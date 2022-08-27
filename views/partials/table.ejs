@@ -1,0 +1,56 @@
+<link rel="stylesheet" href="/table/bootstrap.min.css"/>
+<link rel="stylesheet" href="/table/font-awesome.min.css"/>
+<link rel="stylesheet" href="/table/dataTables.bootstrap4.min.css"/>
+<!-- <script src="/table/jquery-3.3.1.slim.min.js"></script> -->
+<script src="/table/bootstrap.bundle.min.js"></script>
+<script src="/table/jquery.dataTables.min.js"></script>
+<script src="/table/dataTables.bootstrap4.min.js"></script>
+<div class="container py-5">
+  <div class="row py-5">
+    <div class="col-lg-10 mx-auto">
+      <div class="card rounded shadow border-0">
+        <div class="card-body p-5 bg-white rounded">
+          <div class="table-responsive">
+            <table
+              id="example"
+              style="width: 100%"
+              class="table table-striped table-bordered"
+            >
+              <thead>
+                <tr>
+                  <th>اختر</th>
+                  <th>Item Code</th>
+                  <th>Item Name</th>
+                  <th>Barcode</th>
+                  <th>Unit</th>
+                </tr>
+              </thead>
+              <% if(results) { %>
+              <tbody id="tbody">
+                <% for(let i= 0; i < results.length; i++){ const item =
+                results[i] %>
+                <% if(item.Selected){ %>
+                  <tr class="trEfects" id="tr-<%= item.id %>" style="background-color:green;">
+                <% } else { %>
+                  <tr class="trEfects" id="tr-<%= item.id %>">
+                <% } %>
+                  <% if(item.Selected){ %>
+                    <td class="td-<%= item.id %>" style="display:flex;justify-content:center;align-items:center"><input class="check-box" style="height:25%;width:25%" type="checkbox" id="input-<%= item.id %>" checked="true"></td>
+                  <% } else { %>
+                    <td class="td-<%= item.id %>" style="display:flex;justify-content:center;align-items:center"><input class="check-box" style="height:25%;width:25%" type="checkbox" id="input-<%= item.id %>"></td>
+                  <% } %>
+                  <td class="td-<%= item.id %>" ><%= item.ItemCode %></td>
+                  <td class="td-<%= item.id %>" ><%= item.ItemName %></td>
+                  <td class="td-<%= item.id %>" ><%= item.CodeBars %></td>
+                  <td class="td-<%= item.id %>" ><%= item.BuyUnitMsr %></td>
+                </tr>
+                <% }; %>
+              </tbody>
+              <% } %>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
