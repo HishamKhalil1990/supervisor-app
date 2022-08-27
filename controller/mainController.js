@@ -1,4 +1,3 @@
-const hana = require('../utils/hana')
 const functions = require('../utils/functions')
 const prisma = require('../utils/prismaDB')
 
@@ -13,9 +12,13 @@ const validate = async (req,res) => {
         res.send({msg: 'error'})
     }
     else if(user.length != 0){
+        let message = {
+            msg : 'validate'
+        }
         req.session.loggedin = true
         req.session.username = user[0].Username
-        res.send({msg : 'validate'})
+        await functions.getTransferAvailable(message)
+        res.send({message })
     }else if (user.length == 0){
         res.send({msg : 'not validate'})
     }
