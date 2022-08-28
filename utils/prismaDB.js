@@ -60,8 +60,32 @@ const getTransferRequest = async(value) => {
     })
 }
 
+const deleteReqStatus = async (id,arr) => {
+    return new Promise((resolve,reject) => {
+        deleteRequestRecordStatus(id)
+        .catch((e) => {
+            console.log(e)
+            reject()
+        })
+        .finally(async () => {
+            await prisma.$disconnect()
+            arr.push('added')
+            resolve()
+        })
+    })
+}
+
+const deleteRequestRecordStatus = async (recordID) => {
+    await prisma.requestItems.deleteMany({
+        where:{
+            id : parseInt(recordID)
+        },
+    })
+}
+
 module.exports = {
     createAllTransferReq,
     getGenCodes,
-    getTransferRequest
+    getTransferRequest,
+    deleteReqStatus
 }

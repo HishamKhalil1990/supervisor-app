@@ -1,7 +1,8 @@
 let pageOption = 'countName'
 const countNameDiv = `<div id="div" style="display: flex;justify-content: center;align-items: center;"><label style="margin-right: 5px;">رقم التحويل : </label><select style="margin-right: 15px;min-width: 30%;" id="select-0"></select><botton id="send" class="btu"><p class="para">Enter</p></botton></div>`
-const buttons  = `<div class="btuLoctaion"><botton id="report" class="btu"><p class="para">Report</p></botton><botton id="submitOrder" class="btu" style="margin-left: 30px;"><p class="para">Submit</p></botton><botton id='close1' class="btu" style="margin-left: 30px;"><p class="para">close</p></botton><botton id='exit' class="btu" style="margin-left: 30px;"><p class="para">Exit</p></botton></div>`
+const buttons  = `<div class="btuLoctaion"><botton id="decline" class="btu"><p class="para">Decline</p></botton><botton id="approve" class="btu" style="margin-left: 30px;"><p class="para">Approve</p></botton><botton id='close1' class="btu" style="margin-left: 30px;"><p class="para">close</p></botton><botton id='exit' class="btu" style="margin-left: 30px;"><p class="para">Exit</p></botton></div>`
 let countName;
+let reqStatus;
 $(document).ready(() => {
     showCountName() 
     $('.netError_accept2').on('click',()=>{
@@ -103,19 +104,16 @@ const createTable = (table) => {
     tableDiv.html(table);
     $("#example").DataTable();
     btuDiv.html(buttons);
-    $("#submitOrder").on("click", () => {
+    $("#approve").on("click", () => {
+      reqStatus = 'approve'
       showModal("confirm")
     });
     $(".close_btu").on("click", () => {
       hideModal("confirm");
     });
-    $("#report").on("click", (e) => {
-    const txt = $("#report p")[0].innerHTML.trim();
-    if (txt == "Report") {
-        showReport();
-    } else {
-        showAllReports();
-    }
+    $("#decline").on("click", (e) => {
+      reqStatus = 'decline'
+      showModal("confirm")
     });
     $(".netError_denied3").on("click", () => {
         hideModal("net-error3");
@@ -137,7 +135,7 @@ const createTable = (table) => {
     $.get("/Routing").then((data) => {
       $("#body").html(data);
       $(document).ready(function () {
-        document.getElementById("goTransaction").click();
+        document.getElementById("goChoose").click();
       });
     });
   };
@@ -154,7 +152,7 @@ const createTable = (table) => {
   const tryToSubmit = () => {
     $("body").attr("style", "height:100%");
     showModal("submit");
-    $.post(`/Count/Submit/${countName}`).then((msg) => {
+    $.post(`/submit/${reqStatus}/${countName}`).then((msg) => {
       if (msg == "done") {
         setTimeout(() => {
           hideModal("submit");
@@ -162,9 +160,10 @@ const createTable = (table) => {
           $("body").attr("style", "height:100%");
           setTimeout(() => {
             showModal("success");
+            $("#exit p")[0].innerHTML = "Log Out"
+            $("#approve").off("click");
+            $("#decline").off("click",);
             setTimeout(() => {
-              $("#exit p")[0].innerHTML = "Log out";
-              $("#report p")[0].innerHTML = "Sent report";
               hideModal("success");
             }, 1000);
           }, 500);
@@ -172,11 +171,6 @@ const createTable = (table) => {
       } else if (msg == "error") {
         setTimeout(() => {
           changeModalCont("net-error3", "submit");
-        }, 1000);
-      } else if (msg == "no data sent") {
-        changeModalCont("noData", "submit");
-        setTimeout(() => {
-          hideModal("noData");
         }, 1000);
       }
     });

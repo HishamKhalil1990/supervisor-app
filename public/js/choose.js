@@ -68,24 +68,24 @@ const showModal = (type) => {
         // case "soon":
         //     $('.modal_soon_container').attr('style','display:flex;');
         //     break;
-        // case "net-error2":
-        //     $('.modal_netError_container2').attr('style','display:flex;');
-        //     break;
+        case "net-error2":
+            $('.modal_netError_container2').attr('style','display:flex;');
+            break;
         // case "notFound":
         //     $('.modal_noPOs_container').attr('style','display:flex;');
         //     break;
-        // case "submit":
-        //     $(".modal_sendDataBack_container").attr("style", "display:flex;");
-        //     break;
-        // case "net-error3":
-        //     $('.modal_netError_container3').attr('style','display:flex;');
-        //     break;
-        // case "success":
-        //     $(".modal_success_container").attr("style", "display:flex;");
-        //     break;
-        // case "confirm":
-        //     $(".modal_confirm_container").attr("style", "display:flex;");
-        //     break;
+        case "submit":
+            $(".modal_sendDataBack_container").attr("style", "display:flex;");
+            break;
+        case "net-error3":
+            $('.modal_netError_container3').attr('style','display:flex;');
+            break;
+        case "success":
+            $(".modal_success_container").attr("style", "display:flex;");
+            break;
+        case "confirm":
+            $(".modal_confirm_container").attr("style", "display:flex;");
+            break;
         // case "count":
         //     $(".modal_counting_container").attr("style", "display:flex;");
         //     break;
@@ -122,24 +122,24 @@ const hideModal = (type) => {
         // case "soon":
         //     $('.modal_soon_container').attr('style','display:none;');
         //     break;
-        // case "net-error2":
-        //     $('.modal_netError_container2').attr('style','display:none;');
-        //     break;
+        case "net-error2":
+            $('.modal_netError_container2').attr('style','display:none;');
+            break;
         // case "notFound":
         //     $('.modal_noPOs_container').attr('style','display:none;');
         //     break;
-        // case "submit":
-        //     $(".modal_sendDataBack_container").attr("style", "display:none;");
-        //     break;
-        // case "net-error3":
-        //     $('.modal_netError_container3').attr('style','display:none;');
-        //     break;
-        // case "success":
-        //     $(".modal_success_container").attr("style", "display:none;");
-        //     break;
-        // case "confirm":
-        //     $(".modal_confirm_container").attr("style", "display:none;");
-        //     break;
+        case "submit":
+            $(".modal_sendDataBack_container").attr("style", "display:none;");
+            break;
+        case "net-error3":
+            $('.modal_netError_container3').attr('style','display:none;');
+            break;
+        case "success":
+            $(".modal_success_container").attr("style", "display:none;");
+            break;
+        case "confirm":
+            $(".modal_confirm_container").attr("style", "display:none;");
+            break;
         // case "count":
         //     $(".modal_counting_container").attr("style", "display:none;");
         //     break;

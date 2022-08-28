@@ -85,7 +85,7 @@ const saveTransferRequest = async(result) => {
             WhsName:rec.WhsName,
             CodeBars:rec.CodeBars,
             ConvFactor:rec.ConvFactor,
-            Warehousefrom:rec.Warehousefrom,
+            Warehousefrom:rec.warehousefrom,
             Warehouses:rec.Warehouses,
             Order:rec.QtyOrders,
             GenCode:rec.GenCode,
@@ -96,66 +96,95 @@ const saveTransferRequest = async(result) => {
     return prisma.createAllTransferReq(mappedData)
 }
 
+const changeTransferSapProcess = async(records,reqStatus) => {
+    return new Promise((resolve,reject) => {
+        const start = async() => {
+            const pool = await sql.getSQL()
+            if(pool){
+                const length = records.length
+                const arr = []
+                records.forEach(rec => {
+                    if(rec.Status == 'pending'){
+                        changeRecSap(rec,arr,pool,reqStatus)
+                        .then(() => {
+                            if(arr.length == length){
+                                pool.close();
+                                resolve();
+                            }
+                        })
+                        .catch(() => {
+                            reject()
+                        })
+                    }else{
+                        arr.push('added')
+                        if(arr.length == length){
+                            resolve()
+                        }
+                    }
+                })
+            }else{
+                reject()
+            }
+        }
+        start()
+    })
+}
 
-const updateWhsInfo = async (type,id,value) => {
+const changeRecSap = async(rec,arr,pool,reqStatus) => {
+    return new Promise((resolve,reject) => {
+        const statements = {
+            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = 2 where ID = ${rec.id}`,
+            decline:`delete from ${REQUSET_TRANSFER_TABLE} where ID = ${rec.id}`,
+        }
+        try{
+            pool.request().query(statements[`${reqStatus}`])
+            .then(result => {
+                if(result.rowsAffected.length > 0){
+                    console.log('table record updated')
+                    prisma.deleteReqStatus(rec.id,arr)
+                    .then(() => {
+                        resolve()
+                    })
+                    .catch(() => {
+                        reject()
+                    })
+                }else{
+                    reject()
+                }
+            })
+        }catch(err){
+            reject()
+        }
+    })
+
+}
+
+const getWhs = async (username,whs) => {
+    const method = username? 'username' : 'whs'
     const statements = {
-        open:`update ${USERS_WHS_TABLE} set Allowed = 1 where Username = '${id}'`,
-        close:`update ${USERS_WHS_TABLE} set Allowed = 0 where Username = '${id}'`,
-        closeAll:`update ${USERS_WHS_TABLE} set Allowed = 0 where Allowed = 1`,
-        count:`update ${USERS_WHS_TABLE} set CountingAvailable = ${value} where Username = '${id}'`,
+        username:`select * from ${USERS_WHS_TABLE} where Username = '${username}'`,
+        whs:`select * from ${USERS_WHS_TABLE} where WhsCode = '${whs}'`,
     }
     try{
         const pool = await sql.getSQL();
-        const whsCode = await pool.request().query(statements[`${type}`])
-        .then(result => {
-            pool.close();
-            if(result.rowsAffected.length > 0){
-                if(type == 'open'){
-                    const start = async () => {
-                        const text = 'لقد تم الموافقة على طلبك لعمل طلبية بضاعة في غير وقتها المحدد'
-                        const subject = 'رد السماح بعمل طلبية'
-                        const toEmail = value
-                        await sendEmail(text,subject,toEmail)
-                    }
-                    start()
-                }else if(type == 'close'){
-                    const start = async () => {
-                        const text = 'لقد تم الغاء الموافقة المسبقة لعمل طلبية بضاعة في غير وقتها'
-                        const subject = 'رد السماح بعمل طلبية'
-                        const toEmail = value
-                        await sendEmail(text,subject,toEmail)
-                    }
-                    start()
-                }
-                return 'done'
-            }else{
-                return 'error';
-            }
-        })
-        return whsCode
-    }catch(err){
-        return 'error'
-    }
-}
-
-const getItems = async (id) => {
-    await prisma.deleteAll()
-    const records = await hana.getItems(id)
-    if(records != 'error'){
-        const status = await prisma.createRecords(records)
-        if(status != "error"){
-            return prisma.findAll()
+        if(pool){
+            const whsCode = await pool.request().query(statements[`${method}`])
+            .then(result => {
+                pool.close();
+                return result.recordset;
+            })
+            return whsCode
         }else{
-            return "error"
+            return
         }
-    }else{
-        return 'noData'
+    }catch(err){
+        return
     }
 }
 
 module.exports = {
     getUser,
     getTransferAvailable,
-    getItems,
-    updateWhsInfo,
+    changeTransferSapProcess,
+    getWhs
 }

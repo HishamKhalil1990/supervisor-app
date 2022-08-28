@@ -1,5 +1,6 @@
 const functions = require('../utils/functions')
 const prisma = require('../utils/prismaDB')
+const sendEmail = require('../utils/email')
 
 const loginPage = async (req,res) => {
     res.render('login')
@@ -81,6 +82,55 @@ const getTransfer = async (req,res) => {
     }
 }
 
+const submit = async (req,res) => { 
+    const { reqStatus,value } = req.params
+    try{
+        let records = await prisma.getTransferRequest(value)
+        functions.changeTransferSapProcess(records,reqStatus)
+        .then(() => {
+            res.send('done')
+            const start = async () => {
+                const username = records[0].UserName
+                const warehousefrom = records[0].Warehousefrom
+                const whsCode = records[0].WhsCode
+                const genCode = records[0].GenCode
+                const dataFrom = await functions.getWhs(username,null)
+                const dataTo = await functions.getWhs(null,warehousefrom)
+                let toEmails = {
+                    SupervisorEmail:dataFrom[0].SupervisorEmail,
+                    WhsEmail:dataFrom[0].WhsEmail
+                }
+                let fromEmails = {
+                    SupervisorEmail:dataTo[0].SupervisorEmail,
+                }
+                const subject = 'تحويل بين مستودعات'
+                if(reqStatus == 'approve'){
+                    const text1 = `لقد تم الموافقة على طلبك لعمل صاحب رقم التحويل ${genCode}`
+                    await sendEmail(text1,subject,toEmails.WhsEmail)
+                    let text2 = `سيتم عمل تحويل بضاعة الى مستودع ${whsCode}`
+                    text2 += '\n'
+                    text2 += `رقم التحويل ${genCode}`
+                    await sendEmail(text2,subject,toEmails.SupervisorEmail)
+                    let text3 = `سيتم عمل تحويل بضاعة من مستودع ${warehousefrom}`
+                    text3 += '\n'
+                    text3 += `رقم التحويل ${genCode}`
+                    await sendEmail(text3,subject,fromEmails.SupervisorEmail)
+                }else if(reqStatus == 'decline'){
+                    const text1 = `لقد رفض طلبك لعمل صاحب رقم التحويل ${genCode}`
+                    await sendEmail(text1,subject,toEmails.WhsEmail)
+                }
+            }
+            start()
+        })
+        .catch(() => {
+            res.send('error')
+        })
+    }catch(err){
+        res.send('error')
+    }
+    
+}
+
 module.exports = {
     loginPage,
     validate,
@@ -90,5 +140,6 @@ module.exports = {
     sync,
     transferPage,
     genCodes,
-    getTransfer
+    getTransfer,
+    submit
 }
