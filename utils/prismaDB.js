@@ -1,139 +1,91 @@
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 
-const createRecords = async (records) => {
-    const mappedRecs = records.map((rec,index) => {
-        return {
-            id:index,
-            ItemCode:rec.ItemCode,
-            ItemName:rec.ItemName,
-            CodeBars:rec.CodeBars != null? rec.CodeBars : undefined,
-            WhsCode:rec.WhsCode,
-            BuyUnitMsr:rec.BuyUnitMsr != null? rec.BuyUnitMsr : undefined
-        }
+const createAllTransferReq = async(results) => {
+    await deleteAllTransfer()
+    return await prisma.requestItems.createMany({
+        data:results,
+        skipDuplicates:true
     })
-    return await create(mappedRecs)
     .catch((e) => {
         console.log(e)
         return 'error'
-      })
-      .finally(async () => {
+    })
+    .finally(async () => {
         await prisma.$disconnect()
-        return 'created'
-      })
-}
-
-const deleteAll = async () => {
-    return await prisma.countRequest.deleteMany()
-            .catch((e) => {
-                console.log(e)
-                return 'error'
-            })
-            .finally(async () => {
-                await prisma.$disconnect()
-                return 'deleted'
-            })
-}
-
-const findAll = async () => {
-    return await prisma.countRequest.findMany()
-            .catch((e) => {
-                console.log(e)
-                return 'error'
-            })
-            .finally(async () => {
-                await prisma.$disconnect()
-                return 'deleted'
-            })
-}
-
-const create = async (records) => {
-    return await prisma.countRequest.createMany({
-        data: records,
-        skipDuplicates: true,
+        return 'done'
     })
 }
 
-const updateSelect = async (id,status,counter) => {
-    return await update(id,status,counter)
-                .catch((e) => {
-                    console.log(e)
-                    return 'error'
-                })
-                .finally(async () => {
-                    await prisma.$disconnect()
-                    return 'done'
-                })
+const deleteAllTransfer = async () => {
+    return await prisma.requestItems.deleteMany()
+    .catch((e) => {
+        console.log(e)
+        return
+    })
+    .finally(async () => {
+        await prisma.$disconnect()
+        return
+    })
 }
 
-const updateAllSelect = async (status) => {
-    return await updateAll(status)
-                .catch((e) => {
-                    console.log(e)
-                    return 'error'
-                })
-                .finally(async () => {
-                    await prisma.$disconnect()
-                    return 'done'
-                })
+const getGenCodes = async() => {
+    return await prisma.requestItems.groupBy({
+        by: ['GenCode'],
+        orderBy:[
+            {
+              GenCode: 'desc',
+            }
+        ],
+    })
+    .catch((e) => {
+        console.log(e)
+    })
+    .finally(async () => {
+        await prisma.$disconnect()
+    })
 }
 
-const updateSelectBulk = async (id,status,counter,arr) => {
-    return await update(id,status,counter)
-                .finally(async () => {
-                    await prisma.$disconnect()
-                    arr.push('added')
-                })
-}
-
-const update = async (id,status,counter) => {
-    return await prisma.countRequest.update({
+const getTransferRequest = async(value) => {
+    return await prisma.requestItems.findMany({
         where:{
-            id:parseInt(id)
-        },
-        data:{
-            Selected:status,
-            counter:parseInt(counter)
+            GenCode:value
         }
     })
-}
-
-const updateAll = async (status) => {
-    return await prisma.countRequest.updateMany({
-        where:{
-            Selected:!status
-        },
-        data:{
-            Selected:status,
-        }
+    .catch((e) => {
+        console.log(e)
+    })
+    .finally(async () => {
+        await prisma.$disconnect()
     })
 }
 
-const findReport = async() =>{
-    return await prisma.countRequest.findMany({
-                orderBy:{
-                    counter : 'desc'
-                },
-                where : {
-                    Selected : true
-                }
-            })
-            .catch((e) => {
-                console.log(e)
-                return 'error'
-            })
-            .finally(async () => {
-                await prisma.$disconnect()
-                return 'deleted'
-            })
+const deleteReqStatus = async (id,arr) => {
+    return new Promise((resolve,reject) => {
+        deleteRequestRecordStatus(id)
+        .catch((e) => {
+            console.log(e)
+            reject()
+        })
+        .finally(async () => {
+            await prisma.$disconnect()
+            arr.push('added')
+            resolve()
+        })
+    })
+}
+
+const deleteRequestRecordStatus = async (recordID) => {
+    await prisma.requestItems.deleteMany({
+        where:{
+            id : parseInt(recordID)
+        },
+    })
 }
 
 module.exports = {
-    createRecords,
-    deleteAll,
-    findAll,
-    updateSelect,
-    findReport,
-    updateSelectBulk,
-    updateAllSelect
+    createAllTransferReq,
+    getGenCodes,
+    getTransferRequest,
+    deleteReqStatus
 }

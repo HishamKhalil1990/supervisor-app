@@ -1,13 +1,12 @@
 require('dotenv').config();
 const prisma = require('./prismaDB')
-const hana = require('./hana')
 const sql = require('./sql')
 const sendEmail = require('./email')
 
 // enviroment variables
 const USERS_TABLE = process.env.USERS_TABLE
 const USERS_WHS_TABLE = process.env.USERS_WHS_TABLE
-const COUNTING_REQUEST_PROCDURE = process.env.COUNTING_REQUEST_PROCDURE
+const REQUSET_TRANSFER_TABLE = process.env.REQUSET_TRANSFER_TABLE
 
 const getUser = async (username,password) => {
     try{
@@ -23,120 +22,107 @@ const getUser = async (username,password) => {
     }
 }
 
-const getWhsInfo = async () => {
-    try{
-        const pool = await sql.getSQL();
-        const whsCode = await pool.request().query(`select * from ${USERS_WHS_TABLE}`)
-        .then(result => {
-            pool.close();
-            return result.recordset;
-        })
-        return whsCode
-    }catch(err){
-        return
-    }
+const getTransferAvailable = async() => {
+    return await syncTransferRequest()
+                .then(() => {
+                    return 'done'
+                })
+                .catch(() => {
+                    return 'error'
+                })
 }
 
-const getUseres = async (whs) => {
-    try{
-        const pool = await sql.getSQL();
-        const whsCode = await pool.request().query(`select * from ${USERS_WHS_TABLE} where WhsCode = '${whs}'`)
-        .then(result => {
-            pool.close();
-            return result.recordset;
-        })
-        return whsCode
-    }catch(err){
-        return 'error'
-    }
-}
-
-const updateWhsInfo = async (type,id,value) => {
-    const statements = {
-        open:`update ${USERS_WHS_TABLE} set Allowed = 1 where Username = '${id}'`,
-        close:`update ${USERS_WHS_TABLE} set Allowed = 0 where Username = '${id}'`,
-        closeAll:`update ${USERS_WHS_TABLE} set Allowed = 0 where Allowed = 1`,
-        count:`update ${USERS_WHS_TABLE} set CountingAvailable = ${value} where Username = '${id}'`,
-    }
-    try{
-        const pool = await sql.getSQL();
-        const whsCode = await pool.request().query(statements[`${type}`])
-        .then(result => {
-            pool.close();
-            if(result.rowsAffected.length > 0){
-                if(type == 'open'){
-                    const start = async () => {
-                        const text = 'لقد تم الموافقة على طلبك لعمل طلبية بضاعة في غير وقتها المحدد'
-                        const subject = 'رد السماح بعمل طلبية'
-                        const toEmail = value
-                        await sendEmail(text,subject,toEmail)
-                    }
-                    start()
-                }else if(type == 'close'){
-                    const start = async () => {
-                        const text = 'لقد تم الغاء الموافقة المسبقة لعمل طلبية بضاعة في غير وقتها'
-                        const subject = 'رد السماح بعمل طلبية'
-                        const toEmail = value
-                        await sendEmail(text,subject,toEmail)
-                    }
-                    start()
-                }
-                return 'done'
-            }else{
-                return 'error';
-            }
-        })
-        return whsCode
-    }catch(err){
-        return 'error'
-    }
-}
-
-const getItems = async (id) => {
-    await prisma.deleteAll()
-    const records = await hana.getItems(id)
-    if(records != 'error'){
-        const status = await prisma.createRecords(records)
-        if(status != "error"){
-            return prisma.findAll()
-        }else{
-            return "error"
-        }
-    }else{
-        return 'noData'
-    }
-}
-
-const sendToSql = async (name,time,data,note,user) => {
+const syncTransferRequest = async() => {
     return new Promise((resolve,reject) => {
-        const start = async () => {
-            try{
+        try{
+            const start = async() => {
                 const pool = await sql.getSQL()
-                let quit = false
-                if(!pool){
-                    quit = true
-                }
-                const length = data.length
-                const arr = []
-                if(!quit){
-                    for(let i = 0; i < data.length; i++){
-                        const rec = data[i]
-                        startTransaction(pool,rec,length,arr,name,time,note,user)
-                        .then(() => {
+                if(pool){
+                    await pool.request().query(`select * from ${REQUSET_TRANSFER_TABLE} where SAP_Procces = 3`)
+                    .then(result => {
+                        pool.close();
+                        if(result.recordset.length > 0){
+                            const start = async() => {
+                                const msg = await saveTransferRequest(result.recordset)
+                                if(msg != 'error'){
+                                    resolve()
+                                }else{
+                                    reject()
+                                }
+                            }
+                            start()
+                        }else{
                             resolve()
-                        })
-                        .catch((err) => {
-                            quit = true
-                        })
-                        if(quit){
-                            break;
                         }
-                    }
-                }
-                if(quit){
+                    })
+                }else{
                     reject()
                 }
-            }catch(err){
+            }
+            start()
+        }catch(err){
+            reject()
+        }
+    })
+}
+
+const saveTransferRequest = async(result) => {
+    const mappedData = result.map((rec) => {
+        return {
+            id:rec.ID,
+            ItemCode:rec.ItemCode,
+            ItemName:rec.ItemName,
+            ListNum:rec.ListNum,
+            ListName:rec.ListName,
+            AvgDaily:rec.AvgDaily,
+            SuggQty:rec.SuggQty,
+            OnHand:rec.OnHand,
+            MinStock:rec.MinStock,
+            MaxStock:rec.MaxStock,
+            Price:rec.Price,
+            BuyUnitMsr:rec.BuyUnitMsr,
+            WhsCode:rec.WhsCode,
+            WhsName:rec.WhsName,
+            CodeBars:rec.CodeBars,
+            ConvFactor:rec.ConvFactor,
+            Warehousefrom:rec.warehousefrom,
+            Warehouses:rec.Warehouses,
+            Order:rec.QtyOrders,
+            GenCode:rec.GenCode,
+            UserName:rec.UserName,
+            Note:rec.Note
+        }
+    })
+    return prisma.createAllTransferReq(mappedData)
+}
+
+const changeTransferSapProcess = async(records,reqStatus) => {
+    return new Promise((resolve,reject) => {
+        const start = async() => {
+            const pool = await sql.getSQL()
+            if(pool){
+                const length = records.length
+                const arr = []
+                records.forEach(rec => {
+                    if(rec.Status == 'pending'){
+                        changeRecSap(rec,arr,pool,reqStatus)
+                        .then(() => {
+                            if(arr.length == length){
+                                pool.close();
+                                resolve();
+                            }
+                        })
+                        .catch(() => {
+                            reject()
+                        })
+                    }else{
+                        arr.push('added')
+                        if(arr.length == length){
+                            resolve()
+                        }
+                    }
+                })
+            }else{
                 reject()
             }
         }
@@ -144,60 +130,61 @@ const sendToSql = async (name,time,data,note,user) => {
     })
 }
 
-const startTransaction = async (pool,rec,length,arr,name,time,note,user) => {
-    const transaction = await sql.getTransaction(pool);
+const changeRecSap = async(rec,arr,pool,reqStatus) => {
     return new Promise((resolve,reject) => {
+        const statements = {
+            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = 2 where ID = ${rec.id}`,
+            decline:`delete from ${REQUSET_TRANSFER_TABLE} where ID = ${rec.id}`,
+        }
         try{
-            transaction.begin((err) => {
-                if(err){
-                    console.log("pool",err)
+            pool.request().query(statements[`${reqStatus}`])
+            .then(result => {
+                if(result.rowsAffected.length > 0){
+                    console.log('table record updated')
+                    prisma.deleteReqStatus(rec.id,arr)
+                    .then(() => {
+                        resolve()
+                    })
+                    .catch(() => {
+                        reject()
+                    })
+                }else{
                     reject()
                 }
-                pool.request()
-                .input("CountingName",name)
-                .input("CountingDate",time)
-                .input("ItemCode",rec.ItemCode)
-                .input("ItemName",rec.ItemName)
-                .input("UnitMsr",rec.BuyUnitMsr)
-                .input("WhsCode",rec.WhsCode)
-                .input("CodeBars",rec.CodeBars)
-                .input("Note",note)
-                .input("UserName",user)
-                .execute(COUNTING_REQUEST_PROCDURE,(err,result) => {
-                    if(err){
-                        console.log('excute',err)
-                        reject()
-                    }
-                    transaction.commit((err) => {
-                        if(err){
-                            console.log('transaction error : ',err)
-                            reject()
-                        }
-                        console.log("Transaction committed.");
-                        prisma.updateSelectBulk(rec.id,false,0,arr)
-                        .then(() => {
-                            if(arr.length == length){
-                                pool.close();
-                                resolve();
-                            }
-                        })
-                        .catch(err => {
-                            reject()
-                        })
-                    });
-                })
             })
         }catch(err){
             reject()
         }
     })
+
+}
+
+const getWhs = async (username,whs) => {
+    const method = username? 'username' : 'whs'
+    const statements = {
+        username:`select * from ${USERS_WHS_TABLE} where Username = '${username}'`,
+        whs:`select * from ${USERS_WHS_TABLE} where WhsCode = '${whs}'`,
+    }
+    try{
+        const pool = await sql.getSQL();
+        if(pool){
+            const whsCode = await pool.request().query(statements[`${method}`])
+            .then(result => {
+                pool.close();
+                return result.recordset;
+            })
+            return whsCode
+        }else{
+            return
+        }
+    }catch(err){
+        return
+    }
 }
 
 module.exports = {
-    getItems,
-    sendToSql,
     getUser,
-    getWhsInfo,
-    updateWhsInfo,
-    getUseres
+    getTransferAvailable,
+    changeTransferSapProcess,
+    getWhs
 }

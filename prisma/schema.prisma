@@ -1,0 +1,36 @@
+generator Client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url = env("DATABASE_URL")
+}
+
+model requestItems {
+    id Int @id @unique
+    ItemCode String
+    ItemName String
+    ListNum Int
+    ListName String
+    AvgDaily Decimal @db.Decimal(10,6) @default(0)
+    SuggQty Decimal @db.Decimal(10,6) @default(0)
+    OnHand Decimal @db.Decimal(10,6) @default(0)
+    MinStock Decimal @db.Decimal(10,6) @default(0)
+    MaxStock Decimal @db.Decimal(10,6) @default(0)
+    Price Decimal @db.Decimal(10,6) @default(0)
+    BuyUnitMsr String @default("Piece")
+    WhsCode String
+    WhsName String
+    CodeBars String @default("no bar code")
+    ConvFactor Decimal @db.Decimal(10,6) @default(0)
+    Warehousefrom String @default("")
+    Warehouses String @default("")
+    Order Decimal @db.Decimal(10,6) @default(0)
+    Status String @default("pending")
+    GenCode String
+    UserName String
+    Note String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}

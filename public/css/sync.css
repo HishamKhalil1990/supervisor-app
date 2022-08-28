@@ -1,0 +1,100 @@
+.modal_syncData_container {
+    margin: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal_sendDataBack_container {
+    margin: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.syncLoaderLeft {
+    width: 16em;
+    height: 8em;
+    position: relative;
+    overflow: hidden;
+}
+
+.syncLoaderLeft span {
+    position: absolute;
+    width: 5%;
+    height: 10%;
+    background-color: #590696;
+    border-radius: 50%;
+    bottom: 0.2em;
+    left: -5%;
+    top: 50%;
+    animation: 2s linear infinite;
+    transform-origin: 50% -3em;
+    animation-name: runLeft;
+}
+
+.syncLoaderLeft span:nth-child(2) {animation-delay: 0.15s;}
+.syncLoaderLeft span:nth-child(3) {animation-delay: 0.3s;}
+
+@keyframes runLeft {
+    0% {left: -5%;}
+    70%, 100% {left: 100%;}
+}
+
+.syncLoaderRight {
+    width: 16em;
+    height: 8em;
+    position: relative;
+    overflow: hidden;
+}
+
+.syncLoaderRight span {
+    position: absolute;
+    width: 5%;
+    height: 10%;
+    background-color: #37E2D5;
+    border-radius: 50%;
+    bottom: 0.2em;
+    right: -5%;
+    top: 50%;
+    animation: 2s linear infinite;
+    transform-origin: 50% -3em;
+    animation-name: runright;
+}
+
+.syncLoaderRight span:nth-child(2) {animation-delay: 0.15s;}
+.syncLoaderRight span:nth-child(3) {animation-delay: 0.3s;}
+
+@keyframes runright {
+    0% {right: -5%;}
+    70%, 100% {right: 100%;}
+}
+
+.syncData{
+    margin-top: 10px;
+    text-align: center;
+    font-weight: bolder;
+    color: #87314e;
+}
+
+.dataBox {
+    position: absolute;
+    top: 37%;
+    height: 30%;
+    width:100px;
+    border-radius: 5px;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal_waiting_container {
+    margin: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

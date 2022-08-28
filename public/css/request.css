@@ -1,0 +1,83 @@
+.trEfects:hover{
+    background-color: #87314e;
+    color:#fff;
+}
+
+.table-striped tbody tr:nth-of-type(odd):hover{
+    background-color: #87314e;
+    color:#fff;
+}
+
+.btuLoctaion {
+    width:40%;
+    /* margin-right:auto; 
+    margin-left:auto;  */
+    display: flex;
+    justify-content:flex-end;
+    align-items:center; 
+    /* height: 100px; */
+}
+
+.btu { 
+    height: 40px;
+    width:100px;
+    background-color:#87314e;
+    border-radius: 10px;
+    color:#fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.saveBtu { 
+    background-color:#87314e;
+    border-radius: 5px;
+    color:#fff;
+    display: flex;
+}
+
+.para {
+    text-align: center;
+    margin: 0;
+}
+
+.btu:hover { 
+    background-color:#fff;
+    color:#87314e;
+    border: solid;
+    border-color: #87314e;
+    border-width: 2px;
+}
+
+.saveBtu:hover { 
+    background-color:#fff;
+    color:#87314e;
+    border: solid;
+    border-color: #87314e;
+    border-width: 2px;
+}
+
+.otterDiv {
+    position: absolute;
+    top: 75px;
+    right: 50px;
+    width: 90%;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+input:focus{
+    background-color:beige;
+}

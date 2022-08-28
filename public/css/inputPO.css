@@ -1,0 +1,90 @@
+
+.demo-flex-spacer {
+    flex-grow: 1;
+  }
+  .demo-container {
+    box-shadow: 0px 6px 18px 0px #585858;
+    width: fit-content;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+  }
+  
+  @keyframes gradient { 
+    0%{background-position:0 0}
+    100%{background-position:100% 0}
+  }
+  
+  .webflow-style-input {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    border-radius: 2px;
+    padding: 0rem 0rem 0rem 2rem;
+  }
+
+  .webflow-style-input:after {
+    content: "";
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    z-index: 999;
+    height: 2px;
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
+    background-position: 0% 0%;
+    background-size: 500% auto;
+    animation: gradient 3s linear infinite;
+  }
+  
+  .webflow-style-input input {
+    flex-grow: 1;
+    color: #7881A1;
+    font-size: 1.2rem;
+    line-height: 1.5rem;
+    vertical-align: middle;
+  }
+
+  .webflow-style-input input::-webkit-input-placeholder {
+    color: #7881A1;
+  }
+  
+  .webflow-style-input button {
+    padding: 1rem; 
+    background: green; 
+    border: none; 
+    outline: none;
+    color:  black;
+    font-size: 1.2rem;
+    line-height: 1.5rem;
+    vertical-align: middle;
+    transition: color .25s;
+  }
+
+  .webflow-style-input button:hover {
+    color: #fff;
+  }
+  
+  .webflow-style-input input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  
+  .input-po { 
+    border-style: none; 
+    background: transparent; 
+    outline: none; 
+  }
+
+  .input-po:focus{
+    background: transparent; 
+  }
+  
+  

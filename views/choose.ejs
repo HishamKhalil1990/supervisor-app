@@ -5,10 +5,18 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="/css/cards.css" />
+    <link rel="stylesheet" href="/css/routing.css"/>
+    <link rel="stylesheet" href="/css/modal.css"/>
+    <link rel="stylesheet" href="/css/sync.css"/>
+    <link rel="stylesheet" href="/css/netError.css"/>
+    <link rel="stylesheet" href="/css/success.css"/>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
     <link
-      href="https://fonts.googleapis.com/css?family=Open+Sans"
-      rel="stylesheet"
+    href="https://fonts.googleapis.com/css?family=Open+Sans"
+    rel="stylesheet"
     />
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/choose.js"></script>
     <title>الخيارات</title>
   </head>
   <body class="bodyClass" id="body" style="height: 100%; width: 100%">
@@ -18,6 +26,9 @@
       style="display: flex; justify-content: space-around; align-items: center"
     >
       <%- include("partials/cards") %>
+    </div>
+    <div>
+      <%- include("partials/modal") %>
     </div>
   </body>
 </html>

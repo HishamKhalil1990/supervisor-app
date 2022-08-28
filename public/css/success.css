@@ -1,0 +1,66 @@
+.modal_success_container{
+    height: 100%;
+    width: 100%;
+}
+
+.success_Content {
+    position: relative;
+    height: 100%;
+    background-color: #fff;
+    color: #000;
+    text-align: center;
+    border-radius: 20px;
+  }
+
+.succsess-modal-image {
+    width: 132px;
+    height: 114px;
+    margin: 0 auto;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px #48db71;
+    padding: 11px 10px 2px;
+    position: absolute;
+    top: 24%;
+    left: 37%;
+}
+
+.succsess-button {
+font-size: 1.25em;
+font-weight: bold;
+background-color: #000;
+border: none;
+padding: .5em 1em;
+color: #fff;
+box-shadow: 0 0 0 2px #000 inset;
+border-radius: .25em;
+}
+
+.succsess-button :hover {
+box-shadow: 0 0 0 2px #000 inset;
+color: #000;
+background-color: #fff;
+border: solid #000;
+border-width: 2px;
+}
+
+.succsess-modal-p{
+    font-size: 40px;
+    position: absolute;
+    bottom: 10%;
+    left: 35%;
+    color: #48db71;
+}
+
+.failed-p {
+    font-size: 40px;
+    position: absolute;
+    top: 41%;
+    color: red;
+}
+
+.soon-p {
+    font-size: 40px;
+    position: absolute;
+    top: 41%;
+    color: black;
+}
