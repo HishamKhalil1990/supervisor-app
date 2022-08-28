@@ -46,7 +46,22 @@ const getGenCodes = async() => {
     })
 }
 
+const getTransferRequest = async(value) => {
+    return await prisma.requestItems.findMany({
+        where:{
+            GenCode:value
+        }
+    })
+    .catch((e) => {
+        console.log(e)
+    })
+    .finally(async () => {
+        await prisma.$disconnect()
+    })
+}
+
 module.exports = {
     createAllTransferReq,
-    getGenCodes
+    getGenCodes,
+    getTransferRequest
 }

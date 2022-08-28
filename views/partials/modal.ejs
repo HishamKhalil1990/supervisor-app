@@ -17,24 +17,99 @@
         </div>
       </div>
     </div>
-    <div class="modal_notes_container" style="display: none">
-      <div class="netError_container" style="height: 100%; width: 100%">
+    <div class="modal_netError_container" style="display:none;">
+      <div class="netError_container" style="height: 100%;width: 100%;">
         <div class="netError_Content" id="netError_Popup">
-          <textarea
-            id="textArea"
-            style="
-              position: absolute;
-              text-align: right;
-              height: 50%;
-              width: 90%;
-              left: 5%;
-              top: 10%;
-              border: solid;
-            "
-            placeholder="اضف ملاحظة"
-            rows="5"
-            cols="50"
-          ></textarea>
+          <p style="font-size:40px">لا يوجد اتصال بشبكة الانترنت</p>
+          <div class="netError_btu">
+            <button class="netError_denied">Close</button>
+            <button class="netError_accept">Retry again</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal_sendDataBack_container" style="display:none;">
+      <div style="position: relative;height:100%">
+        <div class="dataBox" style="left: -101px;background-color: #590696;">
+          <p style="text-align:center;color: #fff;">Server</p>
+        </div>
+      </div>
+      <div class="syncLoaderRight">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <div style="position: relative;height:100%">
+        <div class="dataBox" style="background-color: #37E2D5;">
+          <p style="text-align:center;color: #fff;">POS</p>
+        </div>
+      </div>
+    </div>
+    <div class="modal_success_container" style="display:none;">
+      <div class="success_container" style="height: 100%;width: 100%;">
+        <div class="success_Content" id="success_Popup">
+          <div class="succsess-modal-image">
+            <svg viewBox="0 0 32 32" style="fill:#48DB71"><path d="M1 14 L5 10 L13 18 L27 4 L31 8 L13 26 z"></path></svg>
+          </div>
+          <p class="succsess-modal-p" style="font-size:40px">تم الارسال</p>
+        </div>
+      </div>
+    </div>
+    <div class="modal_noData_container" style="display:none;">
+      <div class="success_container" style="height: 100%;width: 100%;">
+        <p class="failed-p" style="font-size:40px">لا يوجد بيانات تم اختيارها للارسال</p>
+      </div>
+    </div>
+    <div class="modal_soon_container" style="display:none;">
+      <div class="success_container" style="height: 100%;width: 100%;">
+        <p class="soon-p" style="font-size:40px">Coming Soon</p>
+      </div>
+    </div>
+    <div class="modal_netError_container2" style="display:none;">
+      <div class="netError_container" style="height: 100%;width: 100%;">
+        <div class="netError_Content" id="netError_Popup">
+          <p style="font-size:40px">لا يوجد اتصال بشبكة الانترنت</p>
+          <div class="netError_btu">
+            <button class="netError_denied2">Close</button>
+            <button class="netError_accept2">Retry again</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal_noPOs_container" style="display:none;">
+      <div class="success_container" style="height: 100%;width: 100%;">
+        <p class="failed-p" style="font-size:40px">لا يوجد بيانات الرجاء التحقق من الرقم المدخل</p>
+      </div>
+    </div>
+    <div class="modal_netError_container3" style="display:none;">
+      <div class="netError_container" style="height: 100%;width: 100%;">
+        <div class="netError_Content" id="netError_Popup">
+          <p style="font-size:40px">لا يوجد اتصال بشبكة الانترنت</p>
+          <div class="netError_btu">
+            <button class="netError_denied3">Close</button>
+            <button class="netError_accept3">Retry again</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal_confirm_container" style="display:none;">
+      <div class="netError_container" style="height: 100%;width: 100%;">
+        <div class="netError_Content" id="netError_Popup">
+          <p style="font-size:40px">الرجاء تاكيد الارسال</p>
+          <div class="netError_btu">
+            <button class="close_btu">Close</button>
+            <button class="confirm_btu">confirm</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal_waiting_container" style="display:none;">
+      <div class="lds-ring"><div></div><div></div><div></div><div></div></div>
+    </div>
+    <div class="modal_notes_container" style="display:none;">
+      <div class="netError_container" style="height: 100%;width: 100%;">
+        <div class="netError_Content" id="netError_Popup">
+          <textarea id="textArea" style="position: absolute;text-align: right;height: 50%;width: 90%;left: 5%;top: 10%;border: solid;" placeholder="اضف ملاحظة" rows="5" cols="50"></textarea>
           <div class="netError_btu">
             <button class="closeAdd_btu">Close</button>
             <button class="add_btu">Continue</button>
@@ -42,24 +117,54 @@
         </div>
       </div>
     </div>
-    <div class="modal_spinner_container" style="display: none">
-        <div class="netError_container" style="height: 100%; width: 100%">
-          <div class="netError_Content" id="netError_Popup">
-            <div id="modal-spinner">
-                <div class="lds-ring">
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                </div>
-            </div>
+    <div class="modal_counting_container" style="display:none;">
+      <div class="netError_container" style="height: 100%;width: 100%;">
+        <div class="netError_Content" id="netError_Popup">
+          <p style="font-size:40px">يوجد طلبات جرد</p>
+          <div class="count_btu">
+            <button class="start_count">Start</button>
           </div>
         </div>
       </div>
-      <div class="modal_notAllowed_container" style="display:none;">
-        <div class="success_container" style="height: 100%;width: 100%;">
-          <p class="failed-p" style="font-size:40px;text-align:right;margin-right: 15px;">لا يوجد اتصال بالانترنت, الرجاء اعادة المحاولة</p>
+    </div>
+    <div class="modal_netError_container4" style="display:none;">
+      <div class="netError_container" style="height: 100%;width: 100%;">
+        <div class="netError_Content" id="netError_Popup">
+          <p style="font-size:40px">لا يوجد اتصال بشبكة الانترنت</p>
+          <div class="netError_btu">
+            <button class="netError_denied4">Back</button>
+            <button class="netError_accept4">Retry again</button>
+          </div>
         </div>
       </div>
+    </div>
+    <div class="modal_netError_container5" style="display:none;">
+      <div class="netError_container" style="height: 100%;width: 100%;">
+        <div class="netError_Content" id="netError_Popup">
+          <p style="font-size:40px">لا يوجد اتصال بشبكة الانترنت</p>
+          <div class="netError_btu">
+            <button class="netError_denied5">Close</button>
+            <button class="netError_accept5">Retry again</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal_request_allowing" style="display:none;">
+      <div class="netError_container" style="height: 100%;width: 100%;">
+        <div class="netError_Content" id="netError_Popup">
+          <p style="font-size:40px;top: 20%;">لا تستطيع عمل الطلبية هذا اليوم. لطلب السماح باجراء الطلبية اضغط ارسال طلب او اضغط المتابعة للتشييك على طلبك</p>
+          <div class="netError_btu">
+            <button class="request_close">Close</button>
+            <button class="send_email">Send Request</button>
+            <button class="check_allow">Continue</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal_notAllowed_container" style="display:none;">
+      <div class="success_container" style="height: 100%;width: 100%;">
+        <p class="failed-p" style="font-size:40px;text-align:right;margin-right: 15px;">لم يتم الحصول على الموافقة حتى الان. الرجاء المحاولة لاحقا</p>
+      </div>
+    </div>
   </div>
 </div>

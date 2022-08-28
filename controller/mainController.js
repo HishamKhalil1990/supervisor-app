@@ -63,8 +63,22 @@ const transferPage = async(req,res) => {
 
 const genCodes = async(req,res) => {
     const codes = await prisma.getGenCodes()
-    console.log(codes)
     res.send(codes)
+}
+
+const getTransfer = async (req,res) => {
+    const { value } = req.params
+    if(req.session.loggedin)
+    {   
+        try{
+            const data = await prisma.getTransferRequest(value)
+            res.render('partials/table',{data})
+        }catch(err){
+            res.send('error')
+        }
+    }else{
+        res.redirect('/Login')
+    }
 }
 
 module.exports = {
@@ -75,5 +89,6 @@ module.exports = {
     routing,
     sync,
     transferPage,
-    genCodes
+    genCodes,
+    getTransfer
 }

@@ -87,7 +87,7 @@ const saveTransferRequest = async(result) => {
             ConvFactor:rec.ConvFactor,
             Warehousefrom:rec.Warehousefrom,
             Warehouses:rec.Warehouses,
-            Order:rec.Order,
+            Order:rec.QtyOrders,
             GenCode:rec.GenCode,
             UserName:rec.UserName,
             Note:rec.Note

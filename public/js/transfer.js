@@ -24,10 +24,10 @@ $(document).ready(() => {
       tryToSubmit();
     });
     $('#goBackBtu').on('click',()=>{
-      goToPage('goTransaction')
+      goToPage('goChoose')
     });
     $('#goHomeBtu').on('click',()=>{
-        goToPage('goTransaction')
+        goToPage('goChoose')
     });  
 })
 
@@ -43,7 +43,7 @@ const showCountName = () => {
           if(countNameValue != ""){
               showTable(countNameValue)
           }else{
-            alert('الرجاء اختر اسم الجرد')
+            alert('الرجاء اختر رقم التحويل')
           }
       })
     }else{
@@ -64,7 +64,7 @@ const getOptions = (data) => {
 
 const showTable = async (value) => {
     showModal('request') 
-    $.post(`/Count/Sync/${value}`).then(msg => {
+    $.post(`/table/${value}`).then(msg => {
         if(msg == 'error'){
             setTimeout(() => {
                 changeModalCont('net-error2','request');
@@ -89,11 +89,6 @@ const showTable = async (value) => {
 const closeTable = () => {
     const tableDiv = $('#receiptTable');
     const btuDiv = $('.otterDiv');
-    try {
-        document.getElementById("tbody").removeEventListener("click", tbodyFunc);
-    } catch (err) {
-        console.log(err);
-    }
     tableDiv.empty();
     btuDiv.empty();
     showCountName() 
@@ -108,11 +103,6 @@ const createTable = (table) => {
     tableDiv.html(table);
     $("#example").DataTable();
     btuDiv.html(buttons);
-    try {
-        document.getElementById("tbody").addEventListener("click", tbodyFunc);
-    } catch (err) {
-        console.log(err);
-    }
     $("#submitOrder").on("click", () => {
       showModal("confirm")
     });
@@ -143,103 +133,6 @@ const createTable = (table) => {
     });
 }
 
-const tbodyFunc = (e) => {
-    const fullID = e.path[0].id;
-    const arr = fullID.split("-");
-    const id = arr[1];
-    inputOrder(id);
-}
-
-const inputOrder = (id) => {
-    $(`#input-${id}`).focus();
-    const input = $(`#input-${id}`);
-    const value = input.val();
-    let previousVal = false;
-    if (value > 0) {
-      previousVal = true;
-      edit(id);
-    }
-    $(`#input-${id}`).on("blur", () => {
-      save(id, input, previousVal);
-      input.off("blur");
-      document.getElementById(`input-${id}`).removeEventListener('keydown',tabFunc)
-    });
-    const tabFunc = (e) => {
-      if(e.key == 'Tab'){
-          setTimeout(() => {
-            const active = document.querySelector(":focus")
-            active.click()
-          },100)
-      }
-    }
-    document.getElementById(`input-${id}`).addEventListener('keydown',tabFunc)
-};
-
-const edit = (id) => {
-    const tr = $(`#tr${id}`);
-    tr.removeClass("active-input");
-    tr.removeClass("semi-active");
-    tr.addClass("hide");
-    tr.css("background-color", "");
-  };
-
-const save = (id, input, previousVal) => {
-    const tr = $(`#tr${id}`);
-    let value = input.val();
-    if (value == "") {
-      if (previousVal) {
-        setOrderValueZero(id);
-      }
-      input.val("");
-    } else if (value.toString()[0] == "-") {
-      if (previousVal) {
-        setOrderValueZero(id);
-      }
-      input.val("");
-      alert("يرجى ادخال قيمة صحيحة");
-    } else {
-      value = trim(value);
-      if (value != 0) {
-        $.post(`/Count/Save/${id}/${value}`).then((msg) => {
-            if (msg == "error") {
-              alert(
-                "IT خطأ داخلي الرجاء المحاولة مرة اخرى او طلب المساعدة من قسم"
-              );
-              input.val("");
-            } else {
-              tr.addClass("active-input");
-              tr.removeClass("hide");
-              tr.css("background-color", "green");
-            }
-        });
-    } else {
-      if (previousVal) {
-        setOrderValueZero(id);
-      }
-      input.val("");
-    }
-  }
-  return;
-};
-
-const trim = (value) => {
-    const str = value.toString();
-    const arr = str.split(".");
-    let leftStr = arr[0];
-    leftStr = parseInt(leftStr);
-    leftStr = leftStr.toString();
-    let newStr = arr[1] ? `${leftStr}.${arr[1]}` : `${leftStr}`;
-    return parseFloat(newStr);
-  };
-
-const setOrderValueZero = async (id) => {
-    $.post(`/Count/Save/${id}/0`).then((msg) => {
-      if (msg == "error") {
-        alert("IT خطأ داخلي الرجاء المحاولة مرة اخرى او طلب المساعدة من قسم");
-      }
-    });
-  };
-
   const showTransaction = () => {
     $.get("/Routing").then((data) => {
       $("#body").html(data);
@@ -256,23 +149,6 @@ const setOrderValueZero = async (id) => {
         document.getElementById("goLogin").click();
       });
     });
-  };
-
-  const showReport = () => {
-    setTimeout(() => {
-      $.get(`/Count/Report`).then((results) => {
-        if (results == "error") {
-          alert("IT خطأ داخلي الرجاء المحاولة مرة اخرى او طلب المساعدة من قسم");
-        } else {
-          $("#reportDiv").html(results);
-          $(document).ready(() => {
-            $("#close").on("click", (e) => {
-              $("#reportDiv").empty();
-            });
-          });
-        }
-      });
-    }, 100);
   };
 
   const tryToSubmit = () => {
@@ -302,21 +178,6 @@ const setOrderValueZero = async (id) => {
         setTimeout(() => {
           hideModal("noData");
         }, 1000);
-      }
-    });
-  };
-
-  const showAllReports = () => {
-    $.get(`/Count/AllReports/${countName}`).then((results) => {
-      if (results == "error") {
-        alert("IT خطأ داخلي الرجاء المحاولة مرة اخرى او طلب المساعدة من قسم");
-      } else {
-        $("#reportDiv").html(results);
-        $(document).ready(() => {
-          $("#close").on("click", (e) => {
-            $("#reportDiv").empty();
-          });
-        });
       }
     });
   };
