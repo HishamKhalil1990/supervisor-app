@@ -1,6 +1,5 @@
 require('dotenv').config();
 const prisma = require('./prismaDB')
-const hana = require('./hana')
 const sql = require('./sql')
 const sendEmail = require('./email')
 
@@ -23,14 +22,13 @@ const getUser = async (username,password) => {
     }
 }
 
-const getTransferAvailable = async(message) => {
+const getTransferAvailable = async() => {
     return await syncTransferRequest()
                 .then(() => {
-                    return true
+                    return 'done'
                 })
                 .catch(() => {
-                    message.msg = 'error'
-                    return false
+                    return 'error'
                 })
 }
 
@@ -47,8 +45,7 @@ const syncTransferRequest = async() => {
                             const start = async() => {
                                 const msg = await saveTransferRequest(result.recordset)
                                 if(msg != 'error'){
-                                    // const names = await prisma.getCountNames()
-                                    resolve(names.length)
+                                    resolve()
                                 }else{
                                     reject()
                                 }
@@ -73,17 +70,30 @@ const saveTransferRequest = async(result) => {
     const mappedData = result.map((rec) => {
         return {
             id:rec.ID,
-            CountingName:rec.CountingName,
-            CountingDate:rec.CountingDate,
             ItemCode:rec.ItemCode,
             ItemName:rec.ItemName,
-            BuyUnitMsr:rec.UnitMsr,
+            ListNum:rec.ListNum,
+            ListName:rec.ListName,
+            AvgDaily:rec.AvgDaily,
+            SuggQty:rec.SuggQty,
+            OnHand:rec.OnHand,
+            MinStock:rec.MinStock,
+            MaxStock:rec.MaxStock,
+            Price:rec.Price,
+            BuyUnitMsr:rec.BuyUnitMsr,
             WhsCode:rec.WhsCode,
+            WhsName:rec.WhsName,
             CodeBars:rec.CodeBars,
-            Note:rec.Note,
+            ConvFactor:rec.ConvFactor,
+            Warehousefrom:rec.Warehousefrom,
+            Warehouses:rec.Warehouses,
+            Order:rec.Order,
+            GenCode:rec.GenCode,
+            UserName:rec.UserName,
+            Note:rec.Note
         }
     })
-    return prisma.createAllcountReq(mappedData)
+    return prisma.createAllTransferReq(mappedData)
 }
 
 

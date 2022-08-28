@@ -1,0 +1,305 @@
+.netError_Content {
+    /* width: 320px; */
+    /* display: flex;
+    flex-direction: column;
+    align-items: center; */
+    position: relative;
+    height: 100%;
+    background-color: #fff;
+    color: #000;
+    text-align: center;
+    border-radius: 20px;
+    /* padding: 30px 30px 70px; */
+  }
+
+
+  .netError_Content  button.modal__close {
+    position: absolute;
+    right: -22px;
+    top: -5px;
+    width: 30px;
+    font-size: 20px;
+    color: #c0c5cb;
+    align-self: flex-end;
+    background-color: transparent;
+    border: none;
+    margin-bottom: 10px;
+  }
+  .netError_Content  img {
+    width: 82px;
+    margin-bottom: 15px;
+  }
+  .netError_Content  p {
+    position: absolute;
+    width: 100%;
+    top: 33%;
+    margin-bottom: 40px;
+    font-size: 18px;
+    text-align: end;
+  }
+  .request_Content  p {
+    position: absolute;
+    width: 100%;
+    top: 20%;
+    margin-bottom: 40px;
+    font-size: 18px;
+    text-align: end;
+  }
+  .netError_Content  button.netError_denied {
+    background-color: red;
+    border: none;
+    border-radius: 5px;
+    width: 200px;
+    padding: 14px;
+    font-size: 16px;
+    color: white;
+    box-shadow: 0px 6px 18px -5px red;
+  }
+
+  .netError_Content  button.netError_denied2 {
+    background-color: red;
+    border: none;
+    border-radius: 5px;
+    width: 200px;
+    padding: 14px;
+    font-size: 16px;
+    color: white;
+    box-shadow: 0px 6px 18px -5px red;
+  }
+
+  .netError_Content  button.netError_denied3 {
+    background-color: red;
+    border: none;
+    border-radius: 5px;
+    width: 200px;
+    padding: 14px;
+    font-size: 16px;
+    color: white;
+    box-shadow: 0px 6px 18px -5px red;
+  }
+
+  .netError_Content  button.netError_denied4 {
+    background-color: red;
+    border: none;
+    border-radius: 5px;
+    width: 200px;
+    padding: 14px;
+    font-size: 16px;
+    color: white;
+    box-shadow: 0px 6px 18px -5px red;
+  }
+
+  .netError_Content  button.netError_denied5 {
+    background-color: red;
+    border: none;
+    border-radius: 5px;
+    width: 200px;
+    padding: 14px;
+    font-size: 16px;
+    color: white;
+    box-shadow: 0px 6px 18px -5px red;
+  }
+
+  .netError_Content  button.request_close {
+    background-color: red;
+    border: none;
+    border-radius: 5px;
+    width: 140px;
+    padding: 14px;
+    font-size: 16px;
+    color: white;
+    box-shadow: 0px 6px 18px -5px red;
+  }
+
+  .netError_Content  button.close_btu {
+    background-color: red;
+    border: none;
+    border-radius: 5px;
+    width: 200px;
+    padding: 14px;
+    font-size: 16px;
+    color: white;
+    box-shadow: 0px 6px 18px -5px red;
+  }
+
+  .netError_Content  button.closeAdd_btu {
+    background-color: red;
+    border: none;
+    border-radius: 5px;
+    width: 200px;
+    padding: 14px;
+    font-size: 16px;
+    color: white;
+    box-shadow: 0px 6px 18px -5px red;
+  }
+
+  .netError_Content  button.netError_accept {
+    background-color: green;
+    border: none;
+    border-radius: 5px;
+    width: 200px;
+    padding: 14px;
+    font-size: 16px;
+    color: white;
+    box-shadow: 0px 6px 18px -5px green;
+  }
+
+  .netError_Content  button.netError_accept2 {
+    background-color: green;
+    border: none;
+    border-radius: 5px;
+    width: 200px;
+    padding: 14px;
+    font-size: 16px;
+    color: white;
+    box-shadow: 0px 6px 18px -5px green;
+  }
+
+  .netError_Content  button.netError_accept3 {
+    background-color: green;
+    border: none;
+    border-radius: 5px;
+    width: 200px;
+    padding: 14px;
+    font-size: 16px;
+    color: white;
+    box-shadow: 0px 6px 18px -5px green;
+  }
+
+  .netError_Content  button.netError_accept4 {
+    background-color: green;
+    border: none;
+    border-radius: 5px;
+    width: 200px;
+    padding: 14px;
+    font-size: 16px;
+    color: white;
+    box-shadow: 0px 6px 18px -5px green;
+  }
+
+  .netError_Content  button.netError_accept5 {
+    background-color: green;
+    border: none;
+    border-radius: 5px;
+    width: 200px;
+    padding: 14px;
+    font-size: 16px;
+    color: white;
+    box-shadow: 0px 6px 18px -5px green;
+  }
+
+  .netError_Content  button.send_email {
+    background-color: gray;
+    border: none;
+    border-radius: 5px;
+    width: 140px;
+    padding: 14px;
+    font-size: 16px;
+    color: white;
+    box-shadow: 0px 6px 18px -5px grey;
+  }
+
+  .netError_Content  button.check_allow {
+    background-color: green;
+    border: none;
+    border-radius: 5px;
+    width: 140px;
+    padding: 14px;
+    font-size: 16px;
+    color: white;
+    box-shadow: 0px 6px 18px -5px green;
+  }
+
+  .netError_Content  button.confirm_btu {
+    background-color: green;
+    border: none;
+    border-radius: 5px;
+    width: 200px;
+    padding: 14px;
+    font-size: 16px;
+    color: white;
+    box-shadow: 0px 6px 18px -5px green;
+  }
+
+  .netError_Content  button.add_btu {
+    background-color: green;
+    border: none;
+    border-radius: 5px;
+    width: 200px;
+    padding: 14px;
+    font-size: 16px;
+    color: white;
+    box-shadow: 0px 6px 18px -5px green;
+  }
+
+  .netError_Content  button.start_count {
+    background-color: green;
+    border: none;
+    border-radius: 5px;
+    width: 200px;
+    padding: 14px;
+    font-size: 16px;
+    color: white;
+    box-shadow: 0px 6px 18px -5px green;
+  }
+
+  .netError_btu{
+    position: absolute;
+    bottom: 0;
+    right: 10%;
+  }
+
+  .modal_netError_container{
+    height: 100%;
+    width: 100%;
+  }
+
+  .modal_netError_container2{
+    height: 100%;
+    width: 100%;
+  }
+  
+  .modal_netError_container3{
+    height: 100%;
+    width: 100%;
+  }
+
+  .modal_netError_container4{
+    height: 100%;
+    width: 100%;
+  }
+
+  .modal_netError_container5{
+    height: 100%;
+    width: 100%;
+  }
+
+  .modal_request_allowing{
+    height: 100%;
+    width: 100%;
+  }
+
+  .modal_confirm_container{
+    height: 100%;
+    width: 100%;
+  }
+
+  .modal_notes_container{
+    height: 100%;
+    width: 100%;
+  }
+
+  .modal_counting_container{
+    height: 100%;
+    width: 100%;
+  }
+
+  .count_btu{
+    width: 75%;
+    position: absolute;
+    bottom: 0;
+    right: 10%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
