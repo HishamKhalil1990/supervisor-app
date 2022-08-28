@@ -22,9 +22,12 @@ const validate = async (req,res) => {
 }
 
 const logOut = async (req,res) => {
-    req.session.loggedin = false
-    req.session.username = undefined
-    res.render('routing')
+    // req.session.loggedin = false
+    // req.session.username = undefined
+    // res.render('routing')
+    req.session.destroy(function(err) {
+        res.render('routing')
+    })
 }
 
 const routing = (req,res) => {
