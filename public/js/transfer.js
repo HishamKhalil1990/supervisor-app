@@ -1,8 +1,9 @@
 let pageOption = 'countName'
-const countNameDiv = `<div id="div" style="display: flex;justify-content: center;align-items: center;"><label style="margin-right: 5px;">رقم التحويل : </label><select style="margin-right: 15px;min-width: 30%;" id="select-0"></select><botton id="send" class="btu"><p class="para">Enter</p></botton></div>`
+const countNameDiv = `<div id="div" style="display: flex;justify-content: center;align-items: center;"><label style="margin-right: 5px;">رقم الطلب : </label><select style="margin-right: 15px;min-width: 30%;" id="select-0"></select><botton id="send" class="btu"><p class="para">Enter</p></botton></div>`
 const buttons  = `<div class="btuLoctaion"><botton id="decline" class="btu"><p class="para">Decline</p></botton><botton id="approve" class="btu" style="margin-left: 30px;"><p class="para">Approve</p></botton><botton id='close1' class="btu" style="margin-left: 30px;"><p class="para">close</p></botton><botton id='exit' class="btu" style="margin-left: 30px;"><p class="para">Exit</p></botton></div>`
 let countName;
 let reqStatus;
+let closeOrder;
 $(document).ready(() => {
     showCountName() 
     $('.netError_accept2').on('click',()=>{
@@ -90,6 +91,11 @@ const showTable = async (value) => {
 const closeTable = () => {
     const tableDiv = $('#receiptTable');
     const btuDiv = $('.otterDiv');
+    try {
+      document.getElementById("tbody").removeEventListener("click", tbodyFunc);
+    } catch (err) {
+        console.log(err);
+    }
     tableDiv.empty();
     btuDiv.empty();
     showCountName() 
@@ -104,6 +110,11 @@ const createTable = (table) => {
     tableDiv.html(table);
     $("#example").DataTable();
     btuDiv.html(buttons);
+    try {
+      document.getElementById("tbody").addEventListener("click", tbodyFunc);
+    } catch (err) {
+        console.log(err);
+    }
     $("#approve").on("click", () => {
       reqStatus = 'approve'
       showModal("confirm")
@@ -131,47 +142,185 @@ const createTable = (table) => {
     });
 }
 
-  const showTransaction = () => {
-    $.get("/Routing").then((data) => {
-      $("#body").html(data);
-      $(document).ready(function () {
-        document.getElementById("goChoose").click();
-      });
+const showTransaction = () => {
+  $.get("/Routing").then((data) => {
+    $("#body").html(data);
+    $(document).ready(function () {
+      document.getElementById("goChoose").click();
     });
-  };
-  
-  const logOut = () => {
-    $.post("/LogOut").then((data) => {
-      $("#body").html(data);
-      $(document).ready(function () {
-        document.getElementById("goLogin").click();
-      });
-    });
-  };
+  });
+};
 
-  const tryToSubmit = () => {
-    $("body").attr("style", "height:100%");
-    showModal("submit");
-    $.post(`/submit/${reqStatus}/${countName}`).then((msg) => {
-      if (msg == "done") {
-        setTimeout(() => {
-          hideModal("submit");
-          $("#tbody").empty();
-          $("body").attr("style", "height:100%");
-          setTimeout(() => {
-            showModal("success");
-            $("#exit p")[0].innerHTML = "Log Out"
-            $("#approve").off("click");
-            $("#decline").off("click",);
-            setTimeout(() => {
-              hideModal("success");
-            }, 1000);
-          }, 500);
-        }, 1000);
-      } else if (msg == "error") {
-        setTimeout(() => {
-          changeModalCont("net-error3", "submit");
-        }, 1000);
-      }
+const logOut = () => {
+  $.post("/LogOut").then((data) => {
+    $("#body").html(data);
+    $(document).ready(function () {
+      document.getElementById("goLogin").click();
     });
-  };
+  });
+};
+
+const tryToSubmit = () => {
+  $("body").attr("style", "height:100%");
+  showModal("submit");
+  $.post(`/submit/${reqStatus}/${countName}`).then((msg) => {
+    if (msg == "done") {
+      setTimeout(() => {
+        hideModal("submit");
+        $("#tbody").empty();
+        $("body").attr("style", "height:100%");
+        setTimeout(() => {
+          showModal("success");
+          $("#exit p")[0].innerHTML = "Log Out"
+          $("#approve").off("click");
+          $("#decline").off("click",);
+          setTimeout(() => {
+            hideModal("success");
+          }, 1000);
+        }, 500);
+      }, 1000);
+    } else if (msg == "error") {
+      setTimeout(() => {
+        changeModalCont("net-error3", "submit");
+      }, 1000);
+    }
+  });
+};
+
+const tbodyFunc = (e) => {
+  const fullID = e.path[0].id;
+  const arr = fullID.split("-");
+  const id = arr[1];
+  inputOrder(id);
+}
+
+const inputOrder = (id) => {
+  $(`#input-${id}`).focus();
+  const input = $(`#input-${id}`);
+  const value = input.val();
+  let previousVal = false;
+  if (value > 0) {
+    previousVal = true;
+    edit(id);
+  }
+  $(`#input-${id}`).on("blur", () => {
+    save(id, input, previousVal,value);
+    input.off("blur");
+    document.getElementById(`input-${id}`).removeEventListener('keydown',tabFunc)
+  });
+  const tabFunc = (e) => {
+    if(e.key == 'Tab'){
+        setTimeout(() => {
+          const active = document.querySelector(":focus")
+          active.click()
+        },100)
+    }
+  }
+  document.getElementById(`input-${id}`).addEventListener('keydown',tabFunc)
+};
+
+const edit = (id) => {
+    const tr = $(`#tr-${id}`);
+    tr.removeClass("active-input");
+    tr.removeClass("semi-active");
+    tr.addClass("hide");
+    tr.css("background-color", "");
+};
+
+const save = (id, input, previousVal,lastValue) => {
+  const tr = $(`#tr-${id}`);
+  let value = input.val();
+  if((lastValue == value) && (value != "")){
+    tr.addClass("active-input");
+    tr.removeClass("hide");
+    tr.css("background-color", "green");
+  }else if (value == "") {
+    if (previousVal) {
+      setOrderValueZero(id);
+    }
+    input.val("");
+  } else if (value.toString()[0] == "-") {
+    if (previousVal) {
+      setOrderValueZero(id);
+    }
+    input.val("");
+    alert("ينبغي تحديد كمية الطلب قبل الحفظ");
+  } else {
+    value = trim(value);
+    if (value != 0) {
+        const multi = checkMulti(value, id);
+        if (multi) {
+            $.post(`/Save/${id}/${value}`).then((msg) => {
+              if (msg == "error") {
+                  alert(
+                  "IT خطأ داخلي الرجاء المحاولة مرة اخرى او طلب المساعدة من قسم"
+                  );
+                  input.val("");
+              } else {
+                tr.addClass("active-input");
+                tr.removeClass("hide");
+                tr.css("background-color", "green");
+              }
+            });
+        } else {
+            const conv = $(`#conv${id}`)[0].innerHTML;
+            const uom = $(`#uom-${id}`)[0].innerHTML;
+            closeOrder = getCloseOrder(value,conv)
+            alert(`الكمية يجب ان تكون من مضاعفات (${conv} ${uom}) اقرب كمية هي ${closeOrder}`);
+            input.val("");
+        }
+    } else {
+        if (previousVal) {
+            setOrderValueZero(id);
+        }
+        input.val("");
+    }
+  }
+  return;
+};
+
+const trim = (value) => {
+  const str = value.toString();
+  const arr = str.split(".");
+  let leftStr = arr[0];
+  leftStr = parseInt(leftStr);
+  leftStr = leftStr.toString();
+  let newStr = arr[1] ? `${leftStr}.${arr[1]}` : `${leftStr}`;
+  return parseFloat(newStr);
+};
+
+const checkMulti = (value, id) => {
+  const conv = $(`#conv${id}`)[0].innerHTML != 0 ? $(`#conv${id}`)[0].innerHTML : value;
+  if (value % conv == 0) {
+    return true;
+  } else {
+    closeOrder = getCloseOrder(value,conv)
+    if(closeOrder == value){
+      return true
+    }else{
+      return false;
+    }
+  }
+};
+
+const getCloseOrder = (value,conValue) => {
+  const firstClose = value + (conValue - value % conValue)
+  let seconClose;
+  if(value > conValue){
+    seconClose = value - (value % conValue)
+  }else{
+    seconClose = firstClose
+  }
+  if(seconClose < 0){
+    seconClose = firstClose
+  }
+  return Math.abs(firstClose - value) <= Math.abs(value- seconClose)? firstClose : seconClose
+}
+
+const setOrderValueZero = async (id) => {
+  $.post(`/Save/${id}/0`).then((msg) => {
+    if (msg == "error") {
+      alert("IT خطأ داخلي الرجاء المحاولة مرة اخرى او طلب المساعدة من قسم");
+    }
+  });
+};
