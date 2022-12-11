@@ -31,6 +31,7 @@ model requestItems {
     GenCode String
     UserName String
     Note String
+    Supervisor String
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 }

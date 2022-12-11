@@ -1,8 +1,12 @@
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 
-const createAllTransferReq = async(results) => {
-    await deleteAllTransfer()
+const createAllTransferReq = async(results,username) => {
+    await deleteAllTransfer({
+        where:{
+            Supervisor:username
+        }
+    })
     return await prisma.requestItems.createMany({
         data:results,
         skipDuplicates:true
@@ -29,8 +33,11 @@ const deleteAllTransfer = async () => {
     })
 }
 
-const getGenCodes = async() => {
+const getGenCodes = async(username) => {
     return await prisma.requestItems.groupBy({
+        where:{
+            Supervisor:username
+        },
         by: ['GenCode'],
         orderBy:[
             {
@@ -83,9 +90,35 @@ const deleteRequestRecordStatus = async (recordID) => {
     })
 }
 
+const update = async (id,value) => {
+    return new Promise((resolve,reject) => {
+        updateExistRecord(id,value)
+        .catch((e) => {
+            console.log(e)
+            reject()
+        })
+        .finally(async () => {
+            await prisma.$disconnect()
+            resolve()
+        })
+    })
+}
+
+const updateExistRecord = async (recordID,value) => {
+    await prisma.requestItems.update({
+        where:{
+            id : parseInt(recordID)
+        },
+        data : {
+            Order: value != null? parseFloat(value) : 0,
+        }
+    })
+}
+
 module.exports = {
     createAllTransferReq,
     getGenCodes,
     getTransferRequest,
-    deleteReqStatus
+    deleteReqStatus,
+    update
 }

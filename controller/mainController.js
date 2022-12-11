@@ -14,7 +14,8 @@ const validate = async (req,res) => {
     }
     else if(user.length != 0){
         req.session.loggedin = true
-        req.session.username = user[0].Username
+        req.session.username = user[0].username
+        req.session.warehouses = user[0].warehouses
         res.send({msg : 'validate'})
     }else if (user.length == 0){
         res.send({msg : 'not validate'})
@@ -49,7 +50,7 @@ const choosePage = async (req,res) => {
 const sync = async (req,res) => {
     const { page } = req.params
     if(page == 'goTransfer'){
-        const msg = await functions.getTransferAvailable()
+        const msg = await functions.getTransferAvailable(req.session.warehouses,req.session.username)
         res.send(msg)
     }else{
         res.send('error')
@@ -66,7 +67,7 @@ const transferPage = async(req,res) => {
 }
 
 const genCodes = async(req,res) => {
-    const codes = await prisma.getGenCodes()
+    const codes = await prisma.getGenCodes(req.session.username)
     res.send(codes)
 }
 
@@ -75,8 +76,8 @@ const getTransfer = async (req,res) => {
     if(req.session.loggedin)
     {   
         try{
-            const data = await prisma.getTransferRequest(value)
-            res.render('partials/table',{data})
+            const results = await prisma.getTransferRequest(value)
+            res.render('partials/table',{results})
         }catch(err){
             res.send('error')
         }
@@ -92,38 +93,38 @@ const submit = async (req,res) => {
         functions.changeTransferSapProcess(records,reqStatus)
         .then(() => {
             res.send('done')
-            const start = async () => {
-                const username = records[0].UserName
-                const warehousefrom = records[0].Warehousefrom
-                const whsCode = records[0].WhsCode
-                const genCode = records[0].GenCode
-                const dataFrom = await functions.getWhs(username,null)
-                const dataTo = await functions.getWhs(null,warehousefrom)
-                let toEmails = {
-                    SupervisorEmail:dataFrom[0].SupervisorEmail,
-                    WhsEmail:dataFrom[0].WhsEmail
-                }
-                let fromEmails = {
-                    SupervisorEmail:dataTo[0].SupervisorEmail,
-                }
-                const subject = 'تحويل بين مستودعات'
-                if(reqStatus == 'approve'){
-                    const text1 = `لقد تم الموافقة على طلبك لعمل صاحب رقم التحويل ${genCode}`
-                    await sendEmail(text1,subject,toEmails.WhsEmail)
-                    let text2 = `سيتم عمل تحويل بضاعة الى مستودع ${whsCode}`
-                    text2 += '\n'
-                    text2 += `رقم التحويل ${genCode}`
-                    await sendEmail(text2,subject,toEmails.SupervisorEmail)
-                    let text3 = `سيتم عمل تحويل بضاعة من مستودع ${warehousefrom}`
-                    text3 += '\n'
-                    text3 += `رقم التحويل ${genCode}`
-                    await sendEmail(text3,subject,fromEmails.SupervisorEmail)
-                }else if(reqStatus == 'decline'){
-                    const text1 = `لقد رفض طلبك لعمل صاحب رقم التحويل ${genCode}`
-                    await sendEmail(text1,subject,toEmails.WhsEmail)
-                }
-            }
-            start()
+            // const start = async () => {
+            //     const username = records[0].UserName
+            //     const warehousefrom = records[0].Warehousefrom
+            //     const whsCode = records[0].WhsCode
+            //     const genCode = records[0].GenCode
+            //     const dataFrom = await functions.getWhs(username,null)
+            //     const dataTo = await functions.getWhs(null,warehousefrom)
+            //     let toEmails = {
+            //         SupervisorEmail:dataFrom[0].SupervisorEmail,
+            //         WhsEmail:dataFrom[0].WhsEmail
+            //     }
+            //     let fromEmails = {
+            //         SupervisorEmail:dataTo[0].SupervisorEmail,
+            //     }
+            //     const subject = 'تحويل بين مستودعات'
+            //     if(reqStatus == 'approve'){
+            //         const text1 = `لقد تم الموافقة على طلبك لعمل صاحب رقم التحويل ${genCode}`
+            //         await sendEmail(text1,subject,toEmails.WhsEmail)
+            //         let text2 = `سيتم عمل تحويل بضاعة الى مستودع ${whsCode}`
+            //         text2 += '\n'
+            //         text2 += `رقم التحويل ${genCode}`
+            //         await sendEmail(text2,subject,toEmails.SupervisorEmail)
+            //         let text3 = `سيتم عمل تحويل بضاعة من مستودع ${warehousefrom}`
+            //         text3 += '\n'
+            //         text3 += `رقم التحويل ${genCode}`
+            //         await sendEmail(text3,subject,fromEmails.SupervisorEmail)
+            //     }else if(reqStatus == 'decline'){
+            //         const text1 = `لقد رفض طلبك لعمل صاحب رقم التحويل ${genCode}`
+            //         await sendEmail(text1,subject,toEmails.WhsEmail)
+            //     }
+            // }
+            // start()
         })
         .catch(() => {
             res.send('error')
@@ -132,6 +133,20 @@ const submit = async (req,res) => {
         res.send('error')
     }
     
+}
+
+const saveOrderValue = async (req,res) => {
+    try{
+        const {id,value} = req.params
+        prisma.update(id,value)
+        .then(() => {
+            res.send('done')
+        }).catch(() => {
+            res.send('error')
+        })
+    }catch(err){
+        res.send('error')
+    }
 }
 
 module.exports = {
@@ -144,5 +159,6 @@ module.exports = {
     transferPage,
     genCodes,
     getTransfer,
-    submit
+    submit,
+    saveOrderValue
 }
