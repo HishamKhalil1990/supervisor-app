@@ -144,7 +144,7 @@ const changeRecSap = async(rec,arr,pool,reqStatus) => {
     }
     return new Promise((resolve,reject) => {
         const statements = {
-            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = 0, QtyOrders = ${rec.Order} where ID = ${rec.id}`,
+            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = 5, QtyOrders = ${rec.Order} where ID = ${rec.id}`,
             decline:`delete from ${REQUSET_TRANSFER_TABLE} where ID = ${rec.id}`,
         }
         try{
