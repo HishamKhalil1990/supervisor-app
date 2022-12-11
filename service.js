@@ -2,9 +2,9 @@ var Service = require('node-windows').Service;
 
 // Create a new service object
 var svc = new Service({
-  name:'Approve app',
-  description: 'Approve app for transfer request between warehouses',
-  script: 'C:\\approve-app\\bin\\www',
+  name:'Supervisor app',
+  description: 'Supervisor app for approving promotions',
+  script: 'C:\\supervisor-app\\bin\\www',
   // execPath: 'C:\\Program Files\\nodejs',
   nodeOptions: [
     '--harmony',
