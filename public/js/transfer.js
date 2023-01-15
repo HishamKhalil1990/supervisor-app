@@ -188,7 +188,7 @@ const tryToSubmit = () => {
 };
 
 const tbodyFunc = (e) => {
-  const fullID = e.path[0].id;
+  const fullID = e.target.id;
   const arr = fullID.split("-");
   const id = arr[1];
   inputOrder(id);
