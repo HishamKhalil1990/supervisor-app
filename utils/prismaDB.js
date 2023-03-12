@@ -16,7 +16,7 @@ const createAllTransferReq = async(results,username) => {
         return 'error'
     })
     .finally(async () => {
-        await prisma.$disconnect()
+        // await prisma.$disconnect()
         return 'done'
     })
 }
@@ -28,7 +28,7 @@ const deleteAllTransfer = async () => {
         return
     })
     .finally(async () => {
-        await prisma.$disconnect()
+        // await prisma.$disconnect()
         return
     })
 }
@@ -49,7 +49,7 @@ const getGenCodes = async(username) => {
         console.log(e)
     })
     .finally(async () => {
-        await prisma.$disconnect()
+        // await prisma.$disconnect()
     })
 }
 
@@ -63,7 +63,7 @@ const getTransferRequest = async(value) => {
         console.log(e)
     })
     .finally(async () => {
-        await prisma.$disconnect()
+        // await prisma.$disconnect()
     })
 }
 
@@ -75,7 +75,7 @@ const deleteReqStatus = async (id,arr) => {
             reject()
         })
         .finally(async () => {
-            await prisma.$disconnect()
+            // await prisma.$disconnect()
             arr.push('added')
             resolve()
         })
@@ -98,7 +98,7 @@ const update = async (id,value) => {
             reject()
         })
         .finally(async () => {
-            await prisma.$disconnect()
+            // await prisma.$disconnect()
             resolve()
         })
     })
