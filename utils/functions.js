@@ -163,6 +163,10 @@ const changeRecSap = async(rec,arr,pool,reqStatus) => {
                 }else{
                     reject()
                 }
+            }).catch(err => {
+                console.log(statements[`${saveStatus}`])
+                console.log('update statment error',err)
+                reject()
             })
         }catch(err){
             reject()
