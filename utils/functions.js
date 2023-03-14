@@ -110,9 +110,9 @@ const changeTransferSapProcess = async(records,reqStatus) => {
             if(pool){
                 const length = records.length
                 const arr = []
-                records.forEach(rec => {
+                records.forEach((rec) => {
                     if(rec.Status == 'pending'){
-                        changeRecSap(rec,arr,pool,reqStatus)
+                        changeRecSap(rec,arr,pool,reqStatus,5)
                         .then(() => {
                             if(arr.length == length){
                                 pool.close();
@@ -137,7 +137,7 @@ const changeTransferSapProcess = async(records,reqStatus) => {
     })
 }
 
-const changeRecSap = async(rec,arr,pool,reqStatus) => {
+const changeRecSap = async(rec,arr,pool,reqStatus,retryCount) => {
     let saveStatus = reqStatus
     if(rec.Order == 0 && reqStatus == 'approve'){
         saveStatus = 'decline'
@@ -164,7 +164,23 @@ const changeRecSap = async(rec,arr,pool,reqStatus) => {
                     reject()
                 }
             }).catch(err => {
-                reject()
+                if(retryCount > 0){
+                    const timeout = 1000
+                    retryCount -= 1
+                    setTimeout(() => {
+                        const start = async() => {
+                            return changeRecSap(rec,arr,pool,reqStatus,retryCount)
+                            .then(() => {
+                                resolve()
+                            }).catch(() => {
+                                reject()
+                            })
+                        }
+                        return start()
+                    },timeout)
+                }else{
+                    reject()
+                }
             })
         }catch(err){
             reject()
