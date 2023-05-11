@@ -103,6 +103,17 @@ const saveTransferRequest = async(result,username) => {
     return prisma.createAllTransferReq(mappedData,username)
 }
 
+function convertUTCDateToLocalDate(date) {
+    var newDate = new Date(date.getTime()+date.getTimezoneOffset()*60*1000);
+
+    var offset = date.getTimezoneOffset() / 60;
+    var hours = date.getHours();
+
+    newDate.setHours(hours - offset);
+
+    return newDate;   
+}
+
 const changeTransferSapProcess = async(records,reqStatus,typeOfSubmit,supervisorName,date) => {
     return new Promise((resolve,reject) => {
         const start = async() => {
@@ -110,9 +121,11 @@ const changeTransferSapProcess = async(records,reqStatus,typeOfSubmit,supervisor
             if(pool){
                 const length = records.length
                 const arr = []
+                let localDate = convertUTCDateToLocalDate(date)
+                localDate = localDate.toISOString()
                 records.forEach((rec) => {
                     if(rec.Status == 'pending'){
-                        changeRecSap(rec,arr,pool,reqStatus,5,typeOfSubmit,supervisorName,date)
+                        changeRecSap(rec,arr,pool,reqStatus,5,typeOfSubmit,supervisorName,localDate)
                         .then(() => {
                             if(arr.length == length){
                                 pool.close();
