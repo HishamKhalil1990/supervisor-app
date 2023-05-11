@@ -146,7 +146,7 @@ const changeRecSap = async(rec,arr,pool,reqStatus,retryCount,typeOfSubmit,superv
         const statements = {
             approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = 5, QtyOrders = ${rec.Order}, supervisorName = '${supervisorName}', approveTime = '${date}' where ID = ${rec.id}`,
             // decline:`delete from ${REQUSET_TRANSFER_TABLE} where ID = ${rec.id}`,
-            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${typeOfSubmit == 'order'? 5 : 6}, QtyOrders = 0, supervisorName = '${supervisorName}', approveTime = '${date}' where ID = ${rec.id}`
+            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${typeOfSubmit == 'receipt'? 6 : 5}, QtyOrders = 0, supervisorName = '${supervisorName}', approveTime = '${date}' where ID = ${rec.id}`
         }
         try{
             pool.request().query(statements[`${saveStatus}`])
