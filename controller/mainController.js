@@ -15,7 +15,9 @@ const validate = async (req,res) => {
     else if(user.length != 0){
         req.session.loggedin = true
         req.session.username = user[0].username
+        req.session.supervisorName = user[0].supervisorName
         req.session.warehouses = user[0].warehouses
+        req.session.email = user[0].email
         res.send({msg : 'validate'})
     }else if (user.length == 0){
         res.send({msg : 'not validate'})
@@ -101,42 +103,32 @@ const submit = async (req,res) => {
     if(req.session.loggedin)
     {
         try{
+            let email = req.session.email
+            let supervisorName = req.session.supervisorName
+            let date = new Date();
+            date = date.toISOString()
             let records = await prisma.getTransferRequest(value)
-            functions.changeTransferSapProcess(records,reqStatus)
+            let genCodeType = records[0].GenCode.split('-')[0]
+            let typeOfSubmit = genCodeType == 'r'? 'receipt' : 'order'
+            functions.changeTransferSapProcess(records,reqStatus,typeOfSubmit,supervisorName,date)
             .then(() => {
                 res.send('done')
-                // const start = async () => {
-                //     const username = records[0].UserName
-                //     const warehousefrom = records[0].Warehousefrom
-                //     const whsCode = records[0].WhsCode
-                //     const genCode = records[0].GenCode
-                //     const dataFrom = await functions.getWhs(username,null)
-                //     const dataTo = await functions.getWhs(null,warehousefrom)
-                //     let toEmails = {
-                //         SupervisorEmail:dataFrom[0].SupervisorEmail,
-                //         WhsEmail:dataFrom[0].WhsEmail
-                //     }
-                //     let fromEmails = {
-                //         SupervisorEmail:dataTo[0].SupervisorEmail,
-                //     }
-                //     const subject = 'تحويل بين مستودعات'
-                //     if(reqStatus == 'approve'){
-                //         const text1 = `لقد تم الموافقة على طلبك لعمل صاحب رقم التحويل ${genCode}`
-                //         await sendEmail(text1,subject,toEmails.WhsEmail)
-                //         let text2 = `سيتم عمل تحويل بضاعة الى مستودع ${whsCode}`
-                //         text2 += '\n'
-                //         text2 += `رقم التحويل ${genCode}`
-                //         await sendEmail(text2,subject,toEmails.SupervisorEmail)
-                //         let text3 = `سيتم عمل تحويل بضاعة من مستودع ${warehousefrom}`
-                //         text3 += '\n'
-                //         text3 += `رقم التحويل ${genCode}`
-                //         await sendEmail(text3,subject,fromEmails.SupervisorEmail)
-                //     }else if(reqStatus == 'decline'){
-                //         const text1 = `لقد رفض طلبك لعمل صاحب رقم التحويل ${genCode}`
-                //         await sendEmail(text1,subject,toEmails.WhsEmail)
-                //     }
-                // }
-                // start()
+                const start = async () => {
+                    const subject = 'تاكيد عمل موافقة/رفض لطلبية'
+                    let text = `تم الانتهاء من تنفيذ الاجراء للطلبية التالية:`
+                    text += '\n'
+                    text += `رقم الطلب ${records[0].GenCode}`
+                    text += '\n'
+                    text += 'نوع الطلبية:'
+                    text += '\n'
+                    text += genCodeType == 'r'? 'ارجاع' : 'جديدة'
+                    text += '\n'
+                    text += 'نوع الاجراء:'
+                    text += '\n'
+                    text += reqStatus == 'approve'? 'موافقة' : 'رفض'
+                    sendEmail(text,subject,email).then(()=>{}).catch(() => {})
+                }
+                start()
             })
             .catch(() => {
                 res.send('error')

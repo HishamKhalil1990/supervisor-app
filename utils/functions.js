@@ -103,7 +103,7 @@ const saveTransferRequest = async(result,username) => {
     return prisma.createAllTransferReq(mappedData,username)
 }
 
-const changeTransferSapProcess = async(records,reqStatus) => {
+const changeTransferSapProcess = async(records,reqStatus,typeOfSubmit,supervisorName,date) => {
     return new Promise((resolve,reject) => {
         const start = async() => {
             const pool = await sql.getSQL()
@@ -112,7 +112,7 @@ const changeTransferSapProcess = async(records,reqStatus) => {
                 const arr = []
                 records.forEach((rec) => {
                     if(rec.Status == 'pending'){
-                        changeRecSap(rec,arr,pool,reqStatus,5)
+                        changeRecSap(rec,arr,pool,reqStatus,5,typeOfSubmit,supervisorName,date)
                         .then(() => {
                             if(arr.length == length){
                                 pool.close();
@@ -137,16 +137,16 @@ const changeTransferSapProcess = async(records,reqStatus) => {
     })
 }
 
-const changeRecSap = async(rec,arr,pool,reqStatus,retryCount) => {
+const changeRecSap = async(rec,arr,pool,reqStatus,retryCount,typeOfSubmit,supervisorName,date) => {
     let saveStatus = reqStatus
     if(rec.Order == 0 && reqStatus == 'approve'){
         saveStatus = 'decline'
     }
     return new Promise((resolve,reject) => {
         const statements = {
-            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = 5, QtyOrders = ${rec.Order} where ID = ${rec.id}`,
+            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = 5, QtyOrders = ${rec.Order}, supervisorName = '${supervisorName}', approveTime = ${date} where ID = ${rec.id}`,
             // decline:`delete from ${REQUSET_TRANSFER_TABLE} where ID = ${rec.id}`,
-            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = 5, QtyOrders = 0 where ID = ${rec.id}`
+            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${typeOfSubmit == 'order'? 5 : 6}, QtyOrders = 0, supervisorName = '${supervisorName}', approveTime = ${date} where ID = ${rec.id}`
         }
         try{
             pool.request().query(statements[`${saveStatus}`])
