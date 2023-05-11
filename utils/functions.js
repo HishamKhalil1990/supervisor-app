@@ -103,11 +103,11 @@ const saveTransferRequest = async(result,username) => {
     return prisma.createAllTransferReq(mappedData,username)
 }
 
-function convertUTCDateToLocalDate(date) {
-    var newDate = new Date(date.getTime()+date.getTimezoneOffset()*60*1000);
-
-    var offset = date.getTimezoneOffset() / 60;
-    var hours = date.getHours();
+function convertUTCDateToLocalDate(d) {
+    let date = new Date(d)
+    let newDate = new Date(date.getTime()+date.getTimezoneOffset()*60*1000);
+    let offset = date.getTimezoneOffset() / 60;
+    let hours = date.getHours();
 
     newDate.setHours(hours - offset);
 
