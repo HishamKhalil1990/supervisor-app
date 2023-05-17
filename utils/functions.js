@@ -45,8 +45,14 @@ const syncTransferRequest = async(warehouses,username) => {
                                 const records = []
                                 const whs = warehouses.split('-')
                                 result.recordset.forEach(rec => {
-                                    if(whs.includes(rec.WhsCode)){
-                                        records.push(rec)
+                                    if(rec.GenCode[0] != 'r'){
+                                        if(whs.includes(rec.WhsCode)){
+                                            records.push(rec)
+                                        }
+                                    }else if(rec.GenCode[0] == 'r'){
+                                        if(whs.includes(rec.warehousefrom)){
+                                            records.push(rec)
+                                        }
                                     }
                                 })
                                 const msg = await saveTransferRequest(records,username)
