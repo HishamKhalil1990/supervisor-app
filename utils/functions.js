@@ -163,9 +163,9 @@ const changeRecSap = async(rec,arr,pool,reqStatus,retryCount,typeOfSubmit,superv
     }
     return new Promise((resolve,reject) => {
         const statements = {
-            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = 5, QtyOrders = ${rec.Order}, supervisorName = '${supervisorName}', approveTime = '${date}' where ID = ${rec.id}`,
+            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = 5, QtyOrders = ${rec.Order}, supervisorName = '${supervisorName}', approveTime = '${(new Date(date).toISOString())}' where ID = ${rec.id}`,
             // decline:`delete from ${REQUSET_TRANSFER_TABLE} where ID = ${rec.id}`,
-            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${typeOfSubmit == 'receipt'? 6 : 5}, QtyOrders = 0, supervisorName = '${supervisorName}', approveTime = '${date}' where ID = ${rec.id}`
+            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${typeOfSubmit == 'receipt'? 6 : 5}, QtyOrders = 0, supervisorName = '${supervisorName}', approveTime = '${(new Date(date).toISOString())}' where ID = ${rec.id}`
         }
         try{
             pool.request().query(statements[`${saveStatus}`])
@@ -188,7 +188,7 @@ const changeRecSap = async(rec,arr,pool,reqStatus,retryCount,typeOfSubmit,superv
                     retryCount -= 1
                     setTimeout(() => {
                         const start = async() => {
-                            return changeRecSap(rec,arr,pool,reqStatus,retryCount)
+                            return changeRecSap(rec,arr,pool,reqStatus,retryCount,typeOfSubmit,supervisorName,date)
                             .then(() => {
                                 resolve()
                             }).catch(() => {
