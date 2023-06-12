@@ -129,18 +129,20 @@ const changeTransferSapProcess = async(records,reqStatus,typeOfSubmit,supervisor
                 const arr = []
                 let localDate = convertUTCDateToLocalDate(date)
                 localDate = localDate.toISOString()
-                records.forEach((rec) => {
+                records.forEach((rec,index) => {
                     if(rec.Status == 'pending'){
-                        changeRecSap(rec,arr,pool,reqStatus,5,typeOfSubmit,supervisorName,localDate)
-                        .then(() => {
-                            if(arr.length == length){
-                                pool.close();
-                                resolve();
-                            }
-                        })
-                        .catch(() => {
-                            reject()
-                        })
+                        setTimeout(async() => {
+                            return changeRecSap(rec,arr,pool,reqStatus,5,typeOfSubmit,supervisorName,localDate)
+                            .then(() => {
+                                if(arr.length == length){
+                                    pool.close();
+                                    resolve();
+                                }
+                            })
+                            .catch(() => {
+                                reject()
+                            })
+                        },30*index)
                     }else{
                         arr.push('added')
                         if(arr.length == length){
