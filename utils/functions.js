@@ -21,8 +21,8 @@ const getUser = async (username,password) => {
     }
 }
 
-const getTransferAvailable = async(warehouses,username) => {
-    return await syncTransferRequest(warehouses,username)
+const getTransferAvailable = async(warehouses,username,role) => {
+    return await syncTransferRequest(warehouses,username,role)
                 .then(() => {
                     return 'done'
                 })
@@ -31,35 +31,45 @@ const getTransferAvailable = async(warehouses,username) => {
                 })
 }
 
-const syncTransferRequest = async(warehouses,username) => {
+const syncTransferRequest = async(warehouses,username,role) => {
     return new Promise((resolve,reject) => {
         try{
+            let sapProcces = role == 'manager'? 7 : 4
             const start = async() => {
                 const pool = await sql.getSQL()
                 if(pool){
-                    await pool.request().query(`select * from ${REQUSET_TRANSFER_TABLE} where SAP_Procces = 4`)
+                    await pool.request().query(`select * from ${REQUSET_TRANSFER_TABLE} where SAP_Procces = ${sapProcces}`)
                     .then(result => {
                         pool.close();
                         if(result.recordset.length > 0){
                             const start = async() => {
-                                const records = []
-                                const whs = warehouses.split('-')
-                                result.recordset.forEach(rec => {
-                                    if(rec.GenCode[0] != 'r'){
-                                        if(whs.includes(rec.WhsCode)){
-                                            records.push(rec)
+                                if(role != 'manager'){
+                                    const records = []
+                                    const whs = warehouses.split('-')
+                                    result.recordset.forEach(rec => {
+                                        if(rec.GenCode[0] != 'r'){
+                                            if(whs.includes(rec.WhsCode)){
+                                                records.push(rec)
+                                            }
+                                        }else if(rec.GenCode[0] == 'r'){
+                                            if(whs.includes(rec.warehousefrom)){
+                                                records.push(rec)
+                                            }
                                         }
-                                    }else if(rec.GenCode[0] == 'r'){
-                                        if(whs.includes(rec.warehousefrom)){
-                                            records.push(rec)
-                                        }
+                                    })
+                                    const msg = await saveTransferRequest(records,username)
+                                    if(msg != 'error'){
+                                        resolve()
+                                    }else{
+                                        reject()
                                     }
-                                })
-                                const msg = await saveTransferRequest(records,username)
-                                if(msg != 'error'){
-                                    resolve()
                                 }else{
-                                    reject()
+                                    const msg = await saveTransferRequest(result.recordset,username)
+                                    if(msg != 'error'){
+                                        resolve()
+                                    }else{
+                                        reject()
+                                    }
                                 }
                             }
                             start()
@@ -86,7 +96,7 @@ const saveTransferRequest = async(result,username) => {
             ItemName:rec.ItemName,
             ListNum:rec.ListNum,
             ListName:rec.ListName,
-            AvgDaily:rec.AvgDaily,
+            AvgDaily:rec.AvgDaily? rec.AvgDaily : 0,
             SuggQty:rec.SuggQty,
             OnHand:rec.OnHand,
             MinStock:rec.MinStock,
@@ -120,7 +130,7 @@ function convertUTCDateToLocalDate(d) {
     return newDate;   
 }
 
-const changeTransferSapProcess = async(records,reqStatus,typeOfSubmit,supervisorName,date) => {
+const changeTransferSapProcess = async(records,reqStatus,typeOfSubmit,supervisorName,date,role) => {
     return new Promise((resolve,reject) => {
         const start = async() => {
             const pool = await sql.getSQL()
@@ -132,7 +142,7 @@ const changeTransferSapProcess = async(records,reqStatus,typeOfSubmit,supervisor
                 records.forEach((rec,index) => {
                     if(rec.Status == 'pending'){
                         setTimeout(async() => {
-                            return changeRecSap(rec,arr,pool,reqStatus,5,typeOfSubmit,supervisorName,localDate)
+                            return changeRecSap(rec,arr,pool,reqStatus,5,typeOfSubmit,supervisorName,localDate,role)
                             .then(() => {
                                 if(arr.length == length){
                                     pool.close();
@@ -158,16 +168,24 @@ const changeTransferSapProcess = async(records,reqStatus,typeOfSubmit,supervisor
     })
 }
 
-const changeRecSap = async(rec,arr,pool,reqStatus,retryCount,typeOfSubmit,supervisorName,date) => {
+const changeRecSap = async(rec,arr,pool,reqStatus,retryCount,typeOfSubmit,supervisorName,date,role) => {
+    let sapProcces = role == 'manager'? 5 : 7
     let saveStatus = reqStatus
     if(rec.Order == 0 && reqStatus == 'approve'){
         saveStatus = 'decline'
     }
     return new Promise((resolve,reject) => {
-        const statements = {
-            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = 5, QtyOrders = ${rec.Order}, supervisorName = '${supervisorName}', approveTime = '${date}' where ID = ${rec.id}`,
+        let statements = role == 'manager'? 
+        {
+            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, QtyOrders = ${rec.Order} where ID = ${rec.id}`,
             // decline:`delete from ${REQUSET_TRANSFER_TABLE} where ID = ${rec.id}`,
-            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${typeOfSubmit == 'receipt'? 6 : 5}, QtyOrders = 0, supervisorName = '${supervisorName}', approveTime = '${date}' where ID = ${rec.id}`
+            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${typeOfSubmit == 'receipt'? 6 : 5}, QtyOrders = 0 where ID = ${rec.id}`
+        }
+        :
+        {
+            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, QtyOrders = ${rec.Order}, supervisorName = '${supervisorName}', approveTime = '${date}' where ID = ${rec.id}`,
+            // decline:`delete from ${REQUSET_TRANSFER_TABLE} where ID = ${rec.id}`,
+            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, QtyOrders = 0, supervisorName = '${supervisorName}', approveTime = '${date}' where ID = ${rec.id}`
         }
         try{
             pool.request().query(statements[`${saveStatus}`])

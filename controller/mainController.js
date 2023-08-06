@@ -1,6 +1,9 @@
+require('dotenv').config();
 const functions = require('../utils/functions')
 const prisma = require('../utils/prismaDB')
 const sendEmail = require('../utils/email')
+
+const MANAGER_EMAIL = process.env.MANAGER_EMAIL;
 
 const loginPage = async (req,res) => {
     res.render('login')
@@ -18,6 +21,7 @@ const validate = async (req,res) => {
         req.session.supervisorName = user[0].supervisorName
         req.session.warehouses = user[0].warehouses
         req.session.email = user[0].email
+        req.session.role = user[0].role
         res.send({msg : 'validate'})
     }else if (user.length == 0){
         res.send({msg : 'not validate'})
@@ -54,7 +58,7 @@ const sync = async (req,res) => {
     {
         const { page } = req.params
         if(page == 'goTransfer'){
-            const msg = await functions.getTransferAvailable(req.session.warehouses,req.session.username)
+            const msg = await functions.getTransferAvailable(req.session.warehouses,req.session.username,req.session.role)
             res.send(msg)
         }else{
             res.send('error')
@@ -110,10 +114,10 @@ const submit = async (req,res) => {
             let records = await prisma.getTransferRequest(value)
             let genCodeType = records[0].GenCode.split('-')[0]
             let typeOfSubmit = genCodeType == 'r'? 'receipt' : 'order'
-            functions.changeTransferSapProcess(records,reqStatus,typeOfSubmit,supervisorName,date)
+            functions.changeTransferSapProcess(records,reqStatus,typeOfSubmit,supervisorName,date,req.session.role)
             .then(() => {
                 res.send('done')
-                const start = async () => {
+                const start = async (email) => {
                     const subject = 'تاكيد عمل موافقة/رفض لطلبية'
                     let text = `تم الانتهاء من تنفيذ الاجراء للطلبية التالية:`
                     text += '\n'
@@ -128,7 +132,12 @@ const submit = async (req,res) => {
                     text += reqStatus == 'approve'? 'موافقة' : 'رفض'
                     sendEmail(text,subject,email).then(()=>{}).catch(() => {})
                 }
-                start()
+                if(req.session.role == "manager"){
+                    start(email)
+                }else{
+                    start(email)
+                    start(MANAGER_EMAIL)
+                }
             })
             .catch(() => {
                 res.send('error')

@@ -12,25 +12,40 @@
                   <th>Item Name</th>
                   <th>Branch</th>
                   <!-- <th>Branch</th> -->
-                  <th>Avg. Daily Sale</th>
+                  <th>Avg. Sale (14 days)</th>
                   <th>On Hand</th>
                   <th>Min</th>
                   <th id="max-th">Max</th>
                   <th>Order</th>
                   <!-- <th>Price</th> -->
                   <th>Unit</th>
+                  <th style="display:none;">changed</th>
                 </tr>
               </thead>
               <% if(results) { %>
               <tbody id="tbody">
-                <% for(let i=0; i < results.length; i++){ const item = results[i] %>
-                  <% if(item.Order > 0) { %>
-                    <tr 
-                        class="trEfects active-input" 
-                        id="tr-<%= item.id %>"
-                        style="background-color:green"
-                      >
-                  <%} else { %>
+                <% for(let i=0; i < results.length; i++){ const item = results[i]
+                  if(item.Order > 0) {
+                    if(parseFloat(item.Order) + parseFloat(item.OnHand) > parseFloat(item.MaxStock)){ %>
+                      <tr 
+                          class="trEfects active-input" 
+                          id="tr-<%= item.id %>"
+                          style="background-color:rgb(255, 38, 0)"
+                        >
+                    <%} else if(parseFloat(item.Order) + parseFloat(item.OnHand) < parseFloat(item.MinStock)){ %>
+                      <tr 
+                          class="trEfects active-input" 
+                          id="tr-<%= item.id %>"
+                          style="background-color:rgb(0, 153, 255)"
+                        >
+                    <%} else { %>
+                      <tr 
+                          class="trEfects active-input" 
+                          id="tr-<%= item.id %>"
+                          style="background-color:green"
+                        >
+                    <%}
+                  } else { %>
                     <tr class="trEfects hide" id="tr-<%= item.id %>">
                   <% } %>
                     <td style="display:none;" id="conv<%= item.id %>"><%= item.ConvFactor %></td>
@@ -38,7 +53,7 @@
                     <td id="td-<%= item.id %>"><%= item.ItemName %></td>
                     <td id="td-<%= item.id %>"><%= item.WhsName %></td>
                     <!-- <td id="td-<%= item.id %>"><%= item.ListName %></td> -->
-                    <td id="td-<%= item.id %>"><%= item.AvgDaily %></td>
+                    <td id="td-<%= item.id %>"><%= (parseFloat(item.AvgDaily)*14).toFixed(3) %></td>
                     <td id="onHand-<%= item.id %>"><%= item.OnHand %></td>
                     <td id="min-<%= item.id %>"><%= item.MinStock %></td>
                     <td id="max-<%= item.id %>"><%= item.MaxStock %></td>
@@ -49,6 +64,7 @@
                     <% } %>
                     <!-- <td id="td-<%= item.id %>"><%= item.Price %></td> -->
                     <td id="uom-<%= item.id %>"><%= item.BuyUnitMsr %></td>
+                    <td style="display:none;" id="changed-<%= item.id %>">no</td>
                   </tr>
                 <% }; %>
               </tbody>

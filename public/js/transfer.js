@@ -227,23 +227,47 @@ const edit = (id) => {
     tr.css("background-color", "");
 };
 
+const getColor = (id,usedValue,onHand,min,max) => {
+  const changed = $(`#changed-${id}`)[0].innerHTML
+  if(changed != 'yes'){
+    if(parseFloat(usedValue) + parseFloat(onHand) > parseFloat(max)){
+      return 'rgb(255, 38, 0)'
+    }else if(parseFloat(usedValue) + parseFloat(onHand) < parseFloat(min)){
+      return 'rgb(0, 153, 255)'
+    }else{
+      return 'green'
+    }
+  }else{
+    return '#ffc107'
+  }
+}
+
 const save = (id, input, previousVal,lastValue) => {
   const tr = $(`#tr-${id}`);
+  const changed = $(`#changed-${id}`)
+  console.log(changed)
+  const onHand = $(`#onHand-${id}`)[0].innerHTML
+  const min = $(`#min-${id}`)[0].innerHTML
+  const max = $(`#max-${id}`)[0].innerHTML
   let value = input.val();
+  let usedValue = value
   if((lastValue == value) && (value != "")){
-    tr.addClass("active-input");
-    tr.removeClass("hide");
-    tr.css("background-color", "green");
+    usedValue = value
   }else if (value == "") {
     if (previousVal) {
       setOrderValueZero(id);
+      changed[0].innerHTML = 'yes'
+      tr.addClass("active-input");
+      tr.removeClass("hide");
+      const color = getColor(id,usedValue,onHand,min,max)
+      tr.css("background-color", color);
     }
-    input.val("");
+    usedValue = 0
   } else if (value.toString()[0] == "-") {
     if (previousVal) {
-      setOrderValueZero(id);
+      input.val(lastValue);
     }
-    input.val("");
+    usedValue = lastValue
     alert("ينبغي تحديد كمية الطلب قبل الحفظ");
   } else {
     value = trim(value);
@@ -255,11 +279,15 @@ const save = (id, input, previousVal,lastValue) => {
                   alert(
                   "IT خطأ داخلي الرجاء المحاولة مرة اخرى او طلب المساعدة من قسم"
                   );
-                  input.val("");
-              } else {
+                  input.val(lastValue);
+                  usedValue = lastValue
+              }else{
+                changed[0].innerHTML = 'yes'
+                usedValue = value
                 tr.addClass("active-input");
                 tr.removeClass("hide");
-                tr.css("background-color", "green");
+                const color = getColor(id,usedValue,onHand,min,max)
+                tr.css("background-color", color);
               }
             });
         } else {
@@ -267,15 +295,21 @@ const save = (id, input, previousVal,lastValue) => {
             const uom = $(`#uom-${id}`)[0].innerHTML;
             closeOrder = getCloseOrder(value,conv)
             alert(`الكمية يجب ان تكون من مضاعفات (${conv} ${uom}) اقرب كمية هي ${closeOrder}`);
-            input.val("");
+            input.val(lastValue);
+            usedValue = lastValue
         }
     } else {
         if (previousVal) {
-            setOrderValueZero(id);
+          changed[0].innerHTML = 'yes'
+          setOrderValueZero(id);
         }
-        input.val("");
+        usedValue = 0
     }
   }
+  tr.addClass("active-input");
+  tr.removeClass("hide");
+  const color = getColor(id,usedValue,onHand,min,max)
+  tr.css("background-color", color);
   return;
 };
 
