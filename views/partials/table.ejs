@@ -19,6 +19,7 @@
                   <th>Order</th>
                   <!-- <th>Price</th> -->
                   <th>Unit</th>
+                  <th>Color</th>
                   <th style="display:none;">changed</th>
                 </tr>
               </thead>
@@ -64,6 +65,23 @@
                     <% } %>
                     <!-- <td id="td-<%= item.id %>"><%= item.Price %></td> -->
                     <td id="uom-<%= item.id %>"><%= item.BuyUnitMsr %></td>
+                    <% if(item.Order > 0) {
+                      if(parseFloat(item.Order) + parseFloat(item.OnHand) > parseFloat(item.MaxStock)){ %>
+                        <td id="color-<%= item.id %>">red</td>
+                      <%} else if(parseFloat(item.Order) + parseFloat(item.OnHand) < parseFloat(item.MinStock)){ %>
+                        <td id="color-<%= item.id %>">blue</td>
+                      <%} else { %>
+                        <td id="color-<%= item.id %>">green</td>
+                      <%}
+                    } else { 
+                      if(parseFloat(item.OnHand) > parseFloat(item.MaxStock)){ %>
+                        <td id="color-<%= item.id %>">red</td>
+                      <%} else if(parseFloat(item.OnHand) < parseFloat(item.MinStock)){ %>
+                        <td id="color-<%= item.id %>">blue</td>
+                      <%} else { %>
+                        <td id="color-<%= item.id %>">green</td>
+                      <%}
+                    } %>
                     <td style="display:none;" id="changed-<%= item.id %>">no</td>
                   </tr>
                 <% }; %>

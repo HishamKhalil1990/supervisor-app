@@ -229,15 +229,20 @@ const edit = (id) => {
 
 const getColor = (id,usedValue,onHand,min,max) => {
   const changed = $(`#changed-${id}`)[0].innerHTML
+  const color = $(`#color-${id}`)
   if(changed != 'yes'){
     if(parseFloat(usedValue) + parseFloat(onHand) > parseFloat(max)){
+      color[0].innerHTML = 'red'
       return 'rgb(255, 38, 0)'
     }else if(parseFloat(usedValue) + parseFloat(onHand) < parseFloat(min)){
+      color[0].innerHTML = 'blue'
       return 'rgb(0, 153, 255)'
     }else{
+      color[0].innerHTML = 'green'
       return 'green'
     }
   }else{
+    color[0].innerHTML = 'yellow'
     return '#ffc107'
   }
 }
