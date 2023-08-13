@@ -196,9 +196,9 @@ const changeRecSap = async(rec,arr,pool,reqStatus,retryCount,typeOfSubmit,superv
     return new Promise((resolve,reject) => {
         let statements = role == 'manager'? 
         {
-            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, QtyOrders = ${rec.Order} where ID = ${rec.id}`,
+            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, receiptQnty = ${rec.receiptQnty}, QtyOrders = ${rec.Order} where ID = ${rec.id}`,
             // decline:`delete from ${REQUSET_TRANSFER_TABLE} where ID = ${rec.id}`,
-            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${typeOfSubmit == 'receipt'? 6 : 5}, QtyOrders = 0 where ID = ${rec.id}`
+            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, receiptQnty = ${rec.receiptQnty}, QtyOrders = 0 where ID = ${rec.id}`
         }
         :
         {
