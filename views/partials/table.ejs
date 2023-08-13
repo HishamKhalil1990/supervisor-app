@@ -17,6 +17,7 @@
                   <th>Min</th>
                   <th id="max-th">Max</th>
                   <th>Order</th>
+                  <th>Receipt Qnty (14 days)</th>
                   <!-- <th>Price</th> -->
                   <th>Unit</th>
                   <th>Color</th>
@@ -64,6 +65,7 @@
                       <td id="td-<%= item.id %>" style="display: flex;justify-content: center;"><input id="input-<%= item.id %>" type="number" style="width: 100px;" step="0.0"/></td>
                     <% } %>
                     <!-- <td id="td-<%= item.id %>"><%= item.Price %></td> -->
+                    <td id="receipt-<%= item.id %>"><%= item.receiptQnty %></td>
                     <td id="uom-<%= item.id %>"><%= item.BuyUnitMsr %></td>
                     <% if(item.Order > 0) {
                       if(parseFloat(item.Order) + parseFloat(item.OnHand) > parseFloat(item.MaxStock)){ %>

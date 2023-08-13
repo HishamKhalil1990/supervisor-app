@@ -1,15 +1,14 @@
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 
-const createAllTransferReq = async(results,username) => {
-    await deleteAllTransfer({
+
+const createTransferRecord = async(data) => {
+    return await prisma.requestItems.upsert({
         where:{
-            Supervisor:username
-        }
-    })
-    return await prisma.requestItems.createMany({
-        data:results,
-        skipDuplicates:true
+            id:data.id
+        },
+        update:{},
+        create:data
     })
     .catch((e) => {
         console.log(e)
@@ -19,6 +18,32 @@ const createAllTransferReq = async(results,username) => {
         // await prisma.$disconnect()
         return 'done'
     })
+}
+
+const createAllTransferReq = async(results,username) => {
+    const promises = []
+    results.forEach(rec => {
+        promises.push(createTransferRecord(rec))
+    })
+    await Promise.all(promises)
+    return 'done'
+    // await deleteAllTransfer({
+    //     where:{
+    //         Supervisor:username
+    //     }
+    // })
+    // return await prisma.requestItems.createMany({
+    //     data:results,
+    //     skipDuplicates:true
+    // })
+    // .catch((e) => {
+    //     console.log(e)
+    //     return 'error'
+    // })
+    // .finally(async () => {
+    //     // await prisma.$disconnect()
+    //     return 'done'
+    // })
 }
 
 const deleteAllTransfer = async () => {

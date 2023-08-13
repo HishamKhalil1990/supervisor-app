@@ -2,6 +2,7 @@ require('dotenv').config();
 const prisma = require('./prismaDB')
 const sql = require('./sql')
 const sendEmail = require('./email')
+const hana = require('./hana')
 
 // enviroment variables
 const USERS_TABLE = process.env.USERS_TABLE
@@ -64,7 +65,24 @@ const syncTransferRequest = async(warehouses,username,role) => {
                                         reject()
                                     }
                                 }else{
-                                    const msg = await saveTransferRequest(result.recordset,username)
+                                    const promises = []
+                                    result.recordset.forEach(rec => {
+                                        if(rec.GenCode[0] != 'r'){
+                                            promises.push(hana.getReceiptQntys(rec.WhsCode,rec.ItemCode))
+                                        }else if(rec.GenCode[0] == 'r'){
+                                            promises.push(hana.getReceiptQntys(rec.warehousefrom,rec.ItemCode))
+                                        }
+                                    })
+                                    const promisesResult = await Promise.all(promises)
+                                    const mappedResults = result.recordset.map((rec,index) => {
+                                        if(promisesResult[index].length > 0){
+                                            rec.receiptQnty = parseFloat(promisesResult[index][0]['SUM(Quantity)'])
+                                        }else{
+                                            rec.receiptQnty = 0
+                                        }
+                                        return rec
+                                    })
+                                    const msg = await saveTransferRequest(mappedResults,username)
                                     if(msg != 'error'){
                                         resolve()
                                     }else{
@@ -113,7 +131,8 @@ const saveTransferRequest = async(result,username) => {
             GenCode:rec.GenCode,
             UserName:rec.UserName,
             Note:rec.Note,
-            Supervisor:username
+            Supervisor:username,
+            receiptQnty:rec.receiptQnty? rec.receiptQnty : 0,
         }
     })
     return prisma.createAllTransferReq(mappedData,username)
