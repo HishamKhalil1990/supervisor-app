@@ -149,35 +149,58 @@ function convertUTCDateToLocalDate(d) {
     return newDate;   
 }
 
+const sendBulkToSql = async(pool,records,reqStatus,supervisorName,date,role) => {
+    const ids = []
+    let localDate = convertUTCDateToLocalDate(date)
+    localDate = localDate.toISOString()
+    let sapProcces = role == 'manager'? 5 : 7
+    let mappedeRecords = records.map(rec => {
+        ids.push(rec.id)
+        let saveStatus = reqStatus
+        if(rec.Order == 0 && reqStatus == 'approve'){
+            saveStatus = 'decline'
+        }
+        let statements = role == 'manager'? 
+        {
+            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, receiptQnty = ${rec.receiptQnty}, QtyOrders = ${rec.Order} where ID = ${rec.id};`,
+            // decline:`delete from ${REQUSET_TRANSFER_TABLE} where ID = ${rec.id}`,
+            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, receiptQnty = ${rec.receiptQnty}, QtyOrders = 0 where ID = ${rec.id};`
+        }
+        :
+        {
+            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, QtyOrders = ${rec.Order}, supervisorName = '${supervisorName}', approveTime = '${localDate}' where ID = ${rec.id};`,
+            // decline:`delete from ${REQUSET_TRANSFER_TABLE} where ID = ${rec.id}`,
+            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, QtyOrders = 0, supervisorName = '${supervisorName}', approveTime = '${localDate}' where ID = ${rec.id};`
+        }
+        return statements[`${saveStatus}`]
+    })
+    mappedeRecords = mappedeRecords.join('')
+    return new Promise((resolve,reject) => {
+        try{
+            pool.batch(mappedeRecords, (err, result) => {
+                if (err) throw err
+                prisma.deleteReqStatus(ids)
+                resolve()
+            })
+        }catch(err){
+            reject()
+        }
+    })
+}
+
 const changeTransferSapProcess = async(records,reqStatus,typeOfSubmit,supervisorName,date,role) => {
     return new Promise((resolve,reject) => {
         const start = async() => {
             const pool = await sql.getSQL()
-            if(pool){
-                const length = records.length
-                const arr = []
-                let localDate = convertUTCDateToLocalDate(date)
-                localDate = localDate.toISOString()
-                records.forEach((rec,index) => {
-                    if(rec.Status == 'pending'){
-                        setTimeout(async() => {
-                            return changeRecSap(rec,arr,pool,reqStatus,5,typeOfSubmit,supervisorName,localDate,role)
-                            .then(() => {
-                                if(arr.length == length){
-                                    pool.close();
-                                    resolve();
-                                }
-                            })
-                            .catch(() => {
-                                reject()
-                            })
-                        },30*index)
-                    }else{
-                        arr.push('added')
-                        if(arr.length == length){
-                            resolve()
-                        }
-                    }
+            if(pool){    
+                sendBulkToSql(pool,records,reqStatus,supervisorName,date,role)
+                .then(() => {
+                    pool.close()
+                    resolve()
+                })
+                .catch(() => {
+                    pool.close()
+                    reject()
                 })
             }else{
                 reject()
@@ -185,66 +208,6 @@ const changeTransferSapProcess = async(records,reqStatus,typeOfSubmit,supervisor
         }
         start()
     })
-}
-
-const changeRecSap = async(rec,arr,pool,reqStatus,retryCount,typeOfSubmit,supervisorName,date,role) => {
-    let sapProcces = role == 'manager'? 5 : 7
-    let saveStatus = reqStatus
-    if(rec.Order == 0 && reqStatus == 'approve'){
-        saveStatus = 'decline'
-    }
-    return new Promise((resolve,reject) => {
-        let statements = role == 'manager'? 
-        {
-            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, receiptQnty = ${rec.receiptQnty}, QtyOrders = ${rec.Order} where ID = ${rec.id}`,
-            // decline:`delete from ${REQUSET_TRANSFER_TABLE} where ID = ${rec.id}`,
-            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, receiptQnty = ${rec.receiptQnty}, QtyOrders = 0 where ID = ${rec.id}`
-        }
-        :
-        {
-            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, QtyOrders = ${rec.Order}, supervisorName = '${supervisorName}', approveTime = '${date}' where ID = ${rec.id}`,
-            // decline:`delete from ${REQUSET_TRANSFER_TABLE} where ID = ${rec.id}`,
-            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, QtyOrders = 0, supervisorName = '${supervisorName}', approveTime = '${date}' where ID = ${rec.id}`
-        }
-        try{
-            pool.request().query(statements[`${saveStatus}`])
-            .then(result => {
-                if(result.rowsAffected.length > 0){
-                    console.log('table record updated')
-                    prisma.deleteReqStatus(rec.id,arr)
-                    .then(() => {
-                        resolve()
-                    })
-                    .catch(() => {
-                        reject()
-                    })
-                }else{
-                    reject()
-                }
-            }).catch(err => {
-                if(retryCount > 0){
-                    const timeout = 1000
-                    retryCount -= 1
-                    setTimeout(() => {
-                        const start = async() => {
-                            return changeRecSap(rec,arr,pool,reqStatus,retryCount,typeOfSubmit,supervisorName,date)
-                            .then(() => {
-                                resolve()
-                            }).catch(() => {
-                                reject()
-                            })
-                        }
-                        return start()
-                    },timeout)
-                }else{
-                    reject()
-                }
-            })
-        }catch(err){
-            reject()
-        }
-    })
-
 }
 
 // const getWhs = async (username,whs) => {

@@ -92,25 +92,26 @@ const getTransferRequest = async(value) => {
     })
 }
 
-const deleteReqStatus = async (id,arr) => {
+const deleteReqStatus = async (ids) => {
     return new Promise((resolve,reject) => {
-        deleteRequestRecordStatus(id)
+        deleteRequestRecordStatus(ids)
         .catch((e) => {
             console.log(e)
             reject()
         })
         .finally(async () => {
             // await prisma.$disconnect()
-            arr.push('added')
             resolve()
         })
     })
 }
 
-const deleteRequestRecordStatus = async (recordID) => {
+const deleteRequestRecordStatus = async (ids) => {
     await prisma.requestItems.deleteMany({
         where:{
-            id : parseInt(recordID)
+            id:{
+                in:ids
+            }
         },
     })
 }
