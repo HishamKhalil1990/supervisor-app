@@ -28,6 +28,18 @@ const mssqlConfig = {
     }
 };
 
+const connectionPool = new mssql.ConnectionPool(mssqlConfig)
+
+// create pool connection
+const getConnectionPool = async () => {
+    try{
+        const connection = await connectionPool.connect();
+        return connection
+    }catch(err){
+        return
+    } 
+}
+
 // create SQL connection
 const getSQL = async () => {
     try{
@@ -53,5 +65,6 @@ const getTransaction = async (pool) => {
 
 module.exports = {
     getSQL,
-    getTransaction
+    getTransaction,
+    getConnectionPool
 };

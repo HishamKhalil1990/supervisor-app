@@ -10,10 +10,9 @@ const REQUSET_TRANSFER_TABLE = process.env.REQUSET_TRANSFER_TABLE
 
 const getUser = async (username,password) => {
     try{
-        const pool = await sql.getSQL();
-        const user = await pool.request().query(`select * from ${USERS_TABLE} where username = '${username}' and password = '${password}'`)
+        const pool = await sql.getConnectionPool()
+        const user = await pool.query(`select * from ${USERS_TABLE} where username = '${username}' and password = '${password}'`)
         .then(result => {
-            pool.close();
             return result.recordset;
         })
         return user
@@ -37,11 +36,10 @@ const syncTransferRequest = async(warehouses,username,role) => {
         try{
             let sapProcces = role == 'manager'? 7 : 4
             const start = async() => {
-                const pool = await sql.getSQL()
+                const pool = await sql.getConnectionPool()
                 if(pool){
-                    await pool.request().query(`select * from ${REQUSET_TRANSFER_TABLE} where SAP_Procces = ${sapProcces}`)
+                    await pool.query(`select * from ${REQUSET_TRANSFER_TABLE} where SAP_Procces = ${sapProcces}`)
                     .then(result => {
-                        pool.close();
                         if(result.recordset.length > 0){
                             const start = async() => {
                                 if(role != 'manager'){
@@ -191,15 +189,13 @@ const sendBulkToSql = async(pool,records,reqStatus,supervisorName,date,role) => 
 const changeTransferSapProcess = async(records,reqStatus,typeOfSubmit,supervisorName,date,role) => {
     return new Promise((resolve,reject) => {
         const start = async() => {
-            const pool = await sql.getSQL()
+            const pool = await sql.getConnectionPool()
             if(pool){    
                 sendBulkToSql(pool,records,reqStatus,supervisorName,date,role)
                 .then(() => {
-                    pool.close()
                     resolve()
                 })
                 .catch(() => {
-                    pool.close()
                     reject()
                 })
             }else{
