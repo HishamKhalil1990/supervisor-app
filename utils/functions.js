@@ -178,7 +178,7 @@ const sendBulkToSql = async(pool,records,reqStatus,supervisorName,date,role) => 
     return new Promise((resolve,reject) => {
         try{
             pool.batch(mappedeRecords, (err, result) => {
-                if (err) throw err
+                if (err) reject()
                 prisma.deleteReqStatus(ids)
                 resolve()
             })
