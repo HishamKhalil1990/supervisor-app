@@ -11,6 +11,7 @@ const REQUSET_TRANSFER_TABLE = process.env.REQUSET_TRANSFER_TABLE
 const getUser = async (username,password) => {
     try{
         const pool = await sql.getConnectionPool()
+        await pool.connect()
         const user = await pool.query(`select * from ${USERS_TABLE} where username = '${username}' and password = '${password}'`)
         .then(result => {
             return result.recordset;
@@ -37,6 +38,7 @@ const syncTransferRequest = async(warehouses,username,role) => {
             let sapProcces = role == 'manager'? 7 : 4
             const start = async() => {
                 const pool = await sql.getConnectionPool()
+                await pool.connect()
                 if(pool){
                     await pool.query(`select * from ${REQUSET_TRANSFER_TABLE} where SAP_Procces = ${sapProcces}`)
                     .then(result => {
@@ -190,6 +192,7 @@ const changeTransferSapProcess = async(records,reqStatus,typeOfSubmit,supervisor
     return new Promise((resolve,reject) => {
         const start = async() => {
             const pool = await sql.getConnectionPool()
+            await pool.connect()
             if(pool){    
                 sendBulkToSql(pool,records,reqStatus,supervisorName,date,role)
                 .then(() => {

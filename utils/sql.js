@@ -33,10 +33,7 @@ const connectionPool = new mssql.ConnectionPool(mssqlConfig)
 // create pool connection
 const getConnectionPool = async () => {
     try{
-        const connection = await connectionPool.connect().then(pool => {
-            return pool
-        })
-        return connection;
+        return connectionPool;
     }catch(err){
         return
     } 
