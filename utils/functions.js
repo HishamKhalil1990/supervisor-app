@@ -154,7 +154,15 @@ const sendBulkToSql = async(pool,records,reqStatus,supervisorName,date,role) => 
     let localDate = convertUTCDateToLocalDate(date)
     localDate = localDate.toISOString()
     let sapProcces = role == 'manager'? 5 : 7
-    let mappedeRecords = records.map(rec => {
+    const existingRecords = await pool.query(`select ItemCode from ${REQUSET_TRANSFER_TABLE} where GenCode = '${records[0].GenCode}' and SAP_Procces = ${sapProcces}`)
+    .then(result => {
+        return result.recordset.map(rec => Object.values(rec)[0])
+    }).catch(err => {
+        return []
+    })
+    let mappedeRecords = records
+    .filter(rec =>!existingRecords.includes(rec.ItemCode))
+    .map(rec => {
         ids.push(rec.id)
         let saveStatus = reqStatus
         if(rec.Order == 0 && reqStatus == 'approve'){
@@ -178,9 +186,12 @@ const sendBulkToSql = async(pool,records,reqStatus,supervisorName,date,role) => 
     return new Promise((resolve,reject) => {
         try{
             pool.batch(mappedeRecords, (err, result) => {
-                if (err) reject()
-                prisma.deleteReqStatus(ids)
-                resolve()
+                if (err){ 
+                    reject()
+                }else{
+                    prisma.deleteReqStatus(ids)
+                    resolve()
+                }
             })
         }catch(err){
             reject()
