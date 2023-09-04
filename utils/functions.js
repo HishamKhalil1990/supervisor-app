@@ -161,9 +161,11 @@ const sendBulkToSql = async(pool,records,reqStatus,supervisorName,date,role) => 
         return []
     })
     let mappedeRecords = records
-    .filter(rec =>!existingRecords.includes(rec.ItemCode))
-    .map(rec => {
+    .filter(rec =>{
         ids.push(rec.id)
+        return !existingRecords.includes(rec.ItemCode)
+    })
+    .map(rec => {
         let saveStatus = reqStatus
         if(rec.Order == 0 && reqStatus == 'approve'){
             saveStatus = 'decline'
