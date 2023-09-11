@@ -7,6 +7,7 @@ const HANA_USER = process.env.HANA_USER;
 const HANA_PASSWORD = process.env.HANA_PASSWORD;
 const HANA_DATABASE = process.env.HANA_DATABASE;
 const HANA_ITEMS_QNTY = process.env.HANA_ITEMS_QNTY;
+const HANA_TOTAL_SALES = process.env.HANA_TOTAL_SALES;
 
 const hanaConfig = {
   serverNode: `${HANA_HOST}:30015`,
@@ -15,32 +16,61 @@ const hanaConfig = {
   sslValidateCertificate: "false",
 };
 
-// const getItems = async (whs) => {
-//   const procedureStatment = `CALL "${HANA_DATABASE}"."${HANA_STOCK_REQUEST_PROCEDURE}" ('${whs}')`;
-//   return execute(procedureStatment);
-// };
-
-const getReceiptQntys = async (whs,itemcode) => {
-  const connection = hana.createConnection();
-  const results = await new Promise((resolve,reject) => {
+const getReceiptQntys = async (whs,itemcode,connection) => {
+  const promise = new Promise((resolve,reject) => {
     try{
-      connection.connect(hanaConfig,(err) => {
-        if (err){
-          console.log(err)
+      connection.exec(`Select * from "${HANA_DATABASE}"."${HANA_ITEMS_QNTY}" where "WhsCode" = '${whs}' and "ItemCode" = '${itemcode}'`, (err, result) => {
+        if(err){
           resolve()
-        };
-        connection.exec(`Select * from "${HANA_DATABASE}"."${HANA_ITEMS_QNTY}" where "WhsCode" = '${whs}' and "ItemCode" = '${itemcode}'`, (err, result) => {
-            resolve(result)
-            connection.disconnect();
-        });
+        }else{
+          resolve(result)
+        }
       });
     }catch(err){
       resolve()
     }
   })
-  return results
+  return promise
 };
 
+const getTotalSales = async (whs,itemcode,connection) => {
+  const promise = new Promise((resolve,reject) => {
+    try{
+      connection.exec(`Select * from "${HANA_DATABASE}"."${HANA_TOTAL_SALES}" where "WhsCode" = '${whs}' and "ItemCode" = '${itemcode}'`, (err, result) => {
+        if(err){
+          resolve()
+        }else{
+          resolve(result)
+        }
+      });
+    }catch(err){
+      resolve()
+    }
+  })
+  return promise
+};
+
+const getHanaItemInfo = async (whs,itemcode) => {
+  const promises = []
+  const connection = hana.createConnection();
+  try{
+    return new Promise((resolve,reject) => {
+      connection.connect(hanaConfig,async(err) => {
+        if (err){
+          console.log(err)
+          resolve(promises)
+        };
+        promises.push(getReceiptQntys(whs,itemcode,connection))
+        promises.push(getTotalSales(whs,itemcode,connection))
+        const results = await Promise.all(promises)
+        connection.disconnect();
+        resolve(results)
+      });
+    })
+  }catch(err){
+    return promises
+  }
+}
 
 const execute = async (procdure) => { 
   return new Promise((resolve, reject) => {
@@ -69,5 +99,5 @@ const execute = async (procdure) => {
 };
 
 module.exports = {
-  getReceiptQntys
+  getHanaItemInfo
 };

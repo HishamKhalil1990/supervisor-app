@@ -12,12 +12,13 @@
                   <th>Item Name</th>
                   <th>Branch</th>
                   <!-- <th>Branch</th> -->
-                  <th>Avg. Sale (14 days)</th>
+                  <th>Avg. Daily Sale</th>
                   <th>On Hand</th>
                   <th>Min</th>
                   <th id="max-th">Max</th>
                   <th>Order</th>
-                  <th>Receipt Qnty (14 days)</th>
+                  <th>Receipt Qnty</th>
+                  <th>Total Sales</th>
                   <!-- <th>Price</th> -->
                   <th>Unit</th>
                   <th>Color</th>
@@ -55,7 +56,7 @@
                     <td id="td-<%= item.id %>"><%= item.ItemName %></td>
                     <td id="td-<%= item.id %>"><%= item.WhsName %></td>
                     <!-- <td id="td-<%= item.id %>"><%= item.ListName %></td> -->
-                    <td id="td-<%= item.id %>"><%= (parseFloat(item.AvgDaily)*14).toFixed(3) %></td>
+                    <td id="td-<%= item.id %>"><%= (parseFloat(item.AvgDaily)).toFixed(3) %></td>
                     <td id="onHand-<%= item.id %>"><%= item.OnHand %></td>
                     <td id="min-<%= item.id %>"><%= item.MinStock %></td>
                     <td id="max-<%= item.id %>"><%= item.MaxStock %></td>
@@ -66,6 +67,7 @@
                     <% } %>
                     <!-- <td id="td-<%= item.id %>"><%= item.Price %></td> -->
                     <td id="receipt-<%= item.id %>"><%= item.receiptQnty %></td>
+                    <td id="receipt-<%= item.id %>"><%= item.totalSales %></td>
                     <td id="uom-<%= item.id %>"><%= item.BuyUnitMsr %></td>
                     <% if(item.Order > 0) {
                       if(parseFloat(item.Order) + parseFloat(item.OnHand) > parseFloat(item.MaxStock)){ %>

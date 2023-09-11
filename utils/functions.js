@@ -68,17 +68,19 @@ const syncTransferRequest = async(warehouses,username,role) => {
                                     const promises = []
                                     result.recordset.forEach(rec => {
                                         if(rec.GenCode[0] != 'r'){
-                                            promises.push(hana.getReceiptQntys(rec.WhsCode,rec.ItemCode))
+                                            promises.push(hana.getHanaItemInfo(rec.WhsCode,rec.ItemCode))
                                         }else if(rec.GenCode[0] == 'r'){
-                                            promises.push(hana.getReceiptQntys(rec.warehousefrom,rec.ItemCode))
+                                            promises.push(hana.getHanaItemInfo(rec.warehousefrom,rec.ItemCode))
                                         }
                                     })
                                     const promisesResult = await Promise.all(promises)
                                     const mappedResults = result.recordset.map((rec,index) => {
                                         if(promisesResult[index].length > 0){
-                                            rec.receiptQnty = parseFloat(promisesResult[index][0]['SUM(Quantity)'])
+                                            rec.receiptQnty = promisesResult[index][0].length > 0? parseFloat(promisesResult[index][0][0]['SUM(Quantity)']) : 0
+                                            rec.totalSales = promisesResult[index][1].length > 0? parseFloat(promisesResult[index][1][0]['SUM(Quantity)']) : 0
                                         }else{
                                             rec.receiptQnty = 0
+                                            rec.totalSales = 0
                                         }
                                         return rec
                                     })
@@ -133,6 +135,7 @@ const saveTransferRequest = async(result,username) => {
             Note:rec.Note,
             Supervisor:username,
             receiptQnty:rec.receiptQnty? rec.receiptQnty : 0,
+            totalSales:rec.totalSales? rec.totalSales : 0,
         }
     })
     return prisma.createAllTransferReq(mappedData,username)
@@ -153,7 +156,7 @@ const sendBulkToSql = async(pool,records,reqStatus,supervisorName,date,role) => 
     const ids = []
     let localDate = convertUTCDateToLocalDate(date)
     localDate = localDate.toISOString()
-    let sapProcces = role == 'manager'? 5 : 7
+    let sapProcces = role == 'manager'? 5 : (records[0].GenCode[0] != 'r'? 7 : 5)
     const existingRecords = await pool.query(`select ItemCode from ${REQUSET_TRANSFER_TABLE} where GenCode = '${records[0].GenCode}' and SAP_Procces = ${sapProcces}`)
     .then(result => {
         return result.recordset.map(rec => Object.values(rec)[0])
@@ -172,15 +175,15 @@ const sendBulkToSql = async(pool,records,reqStatus,supervisorName,date,role) => 
         }
         let statements = role == 'manager'? 
         {
-            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, receiptQnty = ${rec.receiptQnty}, QtyOrders = ${rec.Order} where ID = ${rec.id};`,
+            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, receiptQnty = ${rec.receiptQnty}, totalSales = ${rec.totalSales}, QtyOrders = ${rec.Order} where ID = ${rec.id};`,
             // decline:`delete from ${REQUSET_TRANSFER_TABLE} where ID = ${rec.id}`,
-            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, receiptQnty = ${rec.receiptQnty}, QtyOrders = 0 where ID = ${rec.id};`
+            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, receiptQnty = ${rec.receiptQnty}, totalSales = ${rec.totalSales}, QtyOrders = 0 where ID = ${rec.id};`
         }
         :
         {
             approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, QtyOrders = ${rec.Order}, supervisorName = '${supervisorName}', approveTime = '${localDate}' where ID = ${rec.id};`,
             // decline:`delete from ${REQUSET_TRANSFER_TABLE} where ID = ${rec.id}`,
-            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, QtyOrders = 0, supervisorName = '${supervisorName}', approveTime = '${localDate}' where ID = ${rec.id};`
+            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = 5, QtyOrders = 0, supervisorName = '${supervisorName}', approveTime = '${localDate}' where ID = ${rec.id};`
         }
         return statements[`${saveStatus}`]
     })
@@ -222,32 +225,8 @@ const changeTransferSapProcess = async(records,reqStatus,typeOfSubmit,supervisor
     })
 }
 
-// const getWhs = async (username,whs) => {
-//     const method = username? 'username' : 'whs'
-//     const statements = {
-//         username:`select * from ${USERS_WHS_TABLE} where Username = '${username}'`,
-//         whs:`select * from ${USERS_WHS_TABLE} where WhsCode = '${whs}'`,
-//     }
-//     try{
-//         const pool = await sql.getSQL();
-//         if(pool){
-//             const whsCode = await pool.request().query(statements[`${method}`])
-//             .then(result => {
-//                 pool.close();
-//                 return result.recordset;
-//             })
-//             return whsCode
-//         }else{
-//             return
-//         }
-//     }catch(err){
-//         return
-//     }
-// }
-
 module.exports = {
     getUser,
     getTransferAvailable,
     changeTransferSapProcess,
-    // getWhs
 }

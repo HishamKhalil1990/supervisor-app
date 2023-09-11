@@ -33,6 +33,7 @@ model requestItems {
     Note String
     Supervisor String
     receiptQnty Decimal @db.Decimal(10,6) @default(0)
+    totalSales Decimal @db.Decimal(10,6) @default(0)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 }
