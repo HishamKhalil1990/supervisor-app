@@ -170,9 +170,6 @@ const sendBulkToSql = async(pool,records,reqStatus,supervisorName,date,role) => 
     })
     .map(rec => {
         let saveStatus = reqStatus
-        if(rec.Order == 0 && reqStatus == 'approve'){
-            saveStatus = 'decline'
-        }
         let statements = role == 'manager'? 
         {
             approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, receiptQnty = ${rec.receiptQnty}, totalSales = ${rec.totalSales}, QtyOrders = ${rec.Order} where ID = ${rec.id};`,
