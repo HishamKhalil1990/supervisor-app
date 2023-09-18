@@ -152,11 +152,11 @@ function convertUTCDateToLocalDate(d) {
     return newDate;   
 }
 
-const sendBulkToSql = async(pool,records,reqStatus,supervisorName,date,role) => {
+const sendBulkToSql = async(pool,records,reqStatus,supervisorName,date,role,typeOfSubmit) => {
     const ids = []
     let localDate = convertUTCDateToLocalDate(date)
     localDate = localDate.toISOString()
-    let sapProcces = role == 'manager'? 5 : (records[0].GenCode[0] != 'r'? 7 : 5)
+    let sapProcces = role == 'manager'? 5 : (typeOfSubmit == 'order'? 7 : 5)
     const existingRecords = await pool.query(`select ItemCode from ${REQUSET_TRANSFER_TABLE} where GenCode = '${records[0].GenCode}' and SAP_Procces = ${sapProcces}`)
     .then(result => {
         return result.recordset.map(rec => Object.values(rec)[0])
@@ -207,7 +207,7 @@ const changeTransferSapProcess = async(records,reqStatus,typeOfSubmit,supervisor
             const pool = await sql.getConnectionPool()
             await pool.connect()
             if(pool){    
-                sendBulkToSql(pool,records,reqStatus,supervisorName,date,role)
+                sendBulkToSql(pool,records,reqStatus,supervisorName,date,role,typeOfSubmit)
                 .then(() => {
                     resolve()
                 })
