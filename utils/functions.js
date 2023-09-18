@@ -172,15 +172,13 @@ const sendBulkToSql = async(pool,records,reqStatus,supervisorName,date,role,type
         let saveStatus = reqStatus
         let statements = role == 'manager'? 
         {
-            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, receiptQnty = ${rec.receiptQnty}, totalSales = ${rec.totalSales}, QtyOrders = ${rec.Order} where ID = ${rec.id};`,
-            // decline:`delete from ${REQUSET_TRANSFER_TABLE} where ID = ${rec.id}`,
-            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, receiptQnty = ${rec.receiptQnty}, totalSales = ${rec.totalSales}, QtyOrders = 0 where ID = ${rec.id};`
+            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, receiptQnty = ${rec.receiptQnty}, totalSales = ${rec.totalSales}, QtyOrders = ${rec.Order}, managerName = '${supervisorName}', managerApproveTime = '${localDate}', managerQnty = ${rec.Order}  where ID = ${rec.id};`,
+            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, receiptQnty = ${rec.receiptQnty}, totalSales = ${rec.totalSales}, QtyOrders = 0, managerName = '${supervisorName}', managerApproveTime = '${localDate}', managerQnty = 0 where ID = ${rec.id};`
         }
         :
         {
-            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, QtyOrders = ${rec.Order}, supervisorName = '${supervisorName}', approveTime = '${localDate}' where ID = ${rec.id};`,
-            // decline:`delete from ${REQUSET_TRANSFER_TABLE} where ID = ${rec.id}`,
-            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = 5, QtyOrders = 0, supervisorName = '${supervisorName}', approveTime = '${localDate}' where ID = ${rec.id};`
+            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, QtyOrders = ${rec.Order}, supervisorName = '${supervisorName}', approveTime = '${localDate}', supervisorQnty = ${rec.Order} where ID = ${rec.id};`,
+            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = 5, QtyOrders = 0, supervisorName = '${supervisorName}', approveTime = '${localDate}', supervisorQnty = 0 where ID = ${rec.id};`
         }
         return statements[`${saveStatus}`]
     })
