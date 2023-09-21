@@ -77,7 +77,7 @@ const syncTransferRequest = async(warehouses,username,role) => {
                                     const mappedResults = result.recordset.map((rec,index) => {
                                         if(promisesResult[index].length > 0){
                                             rec.receiptQnty = promisesResult[index][0].length > 0? parseFloat(promisesResult[index][0][0]['SUM(Quantity)']) : 0
-                                            rec.totalSales = promisesResult[index][1].length > 0? parseFloat(promisesResult[index][1][0]['SUM(Quantity)']) : 0
+                                            rec.totalSales = promisesResult[index][1].length > 0? parseFloat(promisesResult[index][1][0]["Quantity"]) : 0
                                         }else{
                                             rec.receiptQnty = 0
                                             rec.totalSales = 0
