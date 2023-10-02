@@ -136,7 +136,9 @@ const submit = async (req,res) => {
                     start(email)
                 }else{
                     start(email)
-                    start(MANAGER_EMAIL)
+                    if(genCodeType != 'r'){
+                        start(MANAGER_EMAIL)
+                    }
                 }
             })
             .catch(() => {
