@@ -141,10 +141,24 @@ const updateExistRecord = async (recordID,value) => {
     })
 }
 
+const getAllChildData = async(username) => {
+    return await prisma.requestItems.findMany({
+        where:{
+            NOT:{     
+                FatherCode : 'None'
+            },
+            Supervisor:username
+        },
+    }).catch((e) => {
+        return []
+    })
+}
+
 module.exports = {
     createAllTransferReq,
     getGenCodes,
     getTransferRequest,
     deleteReqStatus,
-    update
+    update,
+    getAllChildData
 }

@@ -136,6 +136,8 @@ const saveTransferRequest = async(result,username) => {
             Supervisor:username,
             receiptQnty:rec.receiptQnty? rec.receiptQnty : 0,
             totalSales:rec.totalSales? rec.totalSales : 0,
+            FatherCode:rec.fatherCode != null? rec.fatherCode : undefined,
+            ChildName:rec.childName != null? rec.childName : undefined,
         }
     })
     return prisma.createAllTransferReq(mappedData,username)

@@ -71,7 +71,8 @@ const sync = async (req,res) => {
 const transferPage = async(req,res) => {
     if(req.session.loggedin)
     {
-        res.render('transfer')
+        const childData = await prisma.getAllChildData(req.session.username)
+        res.render('transfer',{childData})
     }else{
         res.redirect('/')
     }
@@ -93,7 +94,41 @@ const getTransfer = async (req,res) => {
     {   
         try{
             const results = await prisma.getTransferRequest(value)
-            res.render('partials/table',{results})
+            let itemFathers = []
+            let usedItemFathers = []
+            let childData = []
+            let additionalParent = {}
+            let parentData = results.filter(rec => {
+                if(rec.FatherCode == 'None'){
+                    return true
+                }else{
+                    if(!itemFathers.includes(rec.FatherCode)){
+                        itemFathers.push(rec.FatherCode)
+                        usedItemFathers.push(rec.FatherCode+rec.GenCode)
+                        additionalParent[`${rec.FatherCode}`] = {
+                            id:rec.ItemCode,
+                            ItemCode:rec.ItemCode,
+                            ItemName:rec.ItemName,
+                            ListName:rec.ListName,
+                            BuyUnitMsr:rec.BuyUnitMsr,
+                            Order :0 ,
+                            MinStock: 0,
+                            MaxStock: 0,
+                            OnHand: 0,
+                            FatherCode:rec.FatherCode+rec.GenCode,
+                        }
+                    }
+                    childData.push(rec)
+                    additionalParent[`${rec.FatherCode}`].Order += parseFloat(rec.Order)
+                    additionalParent[`${rec.FatherCode}`].MinStock += parseFloat(rec.MinStock)
+                    additionalParent[`${rec.FatherCode}`].MaxStock += parseFloat(rec.MaxStock)
+                    additionalParent[`${rec.FatherCode}`].OnHand += parseFloat(rec.OnHand)
+                    return false
+                }
+            })
+            additionalParent = Object.values(additionalParent)
+            const newParentData = parentData.concat(additionalParent)
+            res.render('partials/table',{info:{results:newParentData,fathers:usedItemFathers}})
         }catch(err){
             res.send('error')
         }

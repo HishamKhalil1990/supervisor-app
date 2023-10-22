@@ -191,10 +191,10 @@ const tbodyFunc = (e) => {
   const fullID = e.target.id;
   const arr = fullID.split("-");
   const id = arr[1];
-  inputOrder(id);
+  inputOrder(id,null);;
 }
 
-const inputOrder = (id) => {
+const inputOrder = (id,callback) => {
   $(`#input-${id}`).focus();
   const input = $(`#input-${id}`);
   const value = input.val();
@@ -203,10 +203,13 @@ const inputOrder = (id) => {
     previousVal = true;
     edit(id);
   }
-  $(`#input-${id}`).on("blur", () => {
-    save(id, input, previousVal,value);
+  $(`#input-${id}`).on("blur", async() => {
     input.off("blur");
     document.getElementById(`input-${id}`).removeEventListener('keydown',tabFunc)
+    await save(id, input, previousVal,value);
+    if(callback != null){
+      callback(value,id)
+    }
   });
   const tabFunc = (e) => {
     if(e.key == 'Tab'){
@@ -247,10 +250,9 @@ const getColor = (id,usedValue,onHand,min,max) => {
   }
 }
 
-const save = (id, input, previousVal,lastValue) => {
+const save = async(id, input, previousVal,lastValue) => {
   const tr = $(`#tr-${id}`);
   const changed = $(`#changed-${id}`)
-  console.log(changed)
   const onHand = $(`#onHand-${id}`)[0].innerHTML
   const min = $(`#min-${id}`)[0].innerHTML
   const max = $(`#max-${id}`)[0].innerHTML
@@ -279,7 +281,7 @@ const save = (id, input, previousVal,lastValue) => {
     if (value != 0) {
         const multi = checkMulti(value, id);
         if (multi) {
-            $.post(`/Save/${id}/${value}`).then((msg) => {
+            await $.post(`/Save/${id}/${value}`).then((msg) => {
               if (msg == "error") {
                   alert(
                   "IT خطأ داخلي الرجاء المحاولة مرة اخرى او طلب المساعدة من قسم"
@@ -315,7 +317,7 @@ const save = (id, input, previousVal,lastValue) => {
   tr.removeClass("hide");
   const color = getColor(id,usedValue,onHand,min,max)
   tr.css("background-color", color);
-  return;
+  return 'done';
 };
 
 const trim = (value) => {
@@ -334,7 +336,7 @@ const checkMulti = (value, id) => {
     return true;
   } else {
     closeOrder = getCloseOrder(value,conv)
-    if(closeOrder == value){
+    if(parseFloat(closeOrder).toFixed(4) == value){
       return true
     }else{
       return false;

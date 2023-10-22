@@ -1,0 +1,110 @@
+<div id="demo-modal" class="modal-v">
+    <div class="report__content">
+      <div id="closeDiv2">
+        <!-- <button id="excel" class="btu"  style="margin-left: 30px;"><p class="para">Excel</p></button> -->
+        <button id='closeTable'>X</button>
+      </div>
+      <div class="container py-5">
+        <div class="row py-5">
+          <div class="col-lg-10 mx-auto">
+            <div class="card rounded shadow border-0">
+              <div class="card-body p-5 bg-white rounded">
+                <div class="table-responsive">
+                  <table id="example2" style="width:100%" class="table table-striped table-bordered">
+                    <thead>
+                      <tr>
+                        <th>Item Code</th>
+                        <th style="display:none;">ConvFactor</th>
+                        <th>Item Name</th>
+                        <th>Branch</th>
+                        <!-- <th>Branch</th> -->
+                        <th>Avg. Daily Sale</th>
+                        <th>On Hand</th>
+                        <th>Min</th>
+                        <th id="max-th">Max</th>
+                        <th>Order</th>
+                        <th>Receipt Qnty</th>
+                        <th>Total Sales</th>
+                        <!-- <th>Price</th> -->
+                        <th>Unit</th>
+                        <th>Color</th>
+                        <th style="display:none;">changed</th>
+                        <th style="display:none;">Father Code</th>
+                      </tr>
+                    </thead>
+                    <% if(info.results) { %>
+                        <tbody id="tbody2">
+                            <% for(let i=0; i < info.results.length; i++){ 
+                                const item = info.results[i]    
+                                if(item.Order > 0) {
+                                    if(parseFloat(item.Order) + parseFloat(item.OnHand) > parseFloat(item.MaxStock)){ %>
+                                        <tr 
+                                            class="trEfects active-input" 
+                                            id="tr-<%= item.id %>"
+                                            style="background-color:rgb(255, 38, 0)"
+                                        >
+                                    <%} else if(parseFloat(item.Order) + parseFloat(item.OnHand) < parseFloat(item.MinStock)){ %>
+                                        <tr 
+                                            class="trEfects active-input" 
+                                            id="tr-<%= item.id %>"
+                                            style="background-color:rgb(0, 153, 255)"
+                                        >
+                                    <%} else { %>
+                                        <tr 
+                                            class="trEfects active-input" 
+                                            id="tr-<%= item.id %>"
+                                            style="background-color:green"
+                                        >
+                                    <%}
+                                } else { %>
+                                    <tr class="trEfects hide" id="tr-<%= item.id %>">
+                                <% } %>
+                                    <td id="td-<%= item.id %>"><%= item.ItemCode %></td>
+                                    <td style="display:none;" id="conv<%= item.id %>"><%= item.ConvFactor %></td>
+                                    <td id="td-<%= item.id %>"><%= item.ChildName %></td>
+                                    <td id="td-<%= item.id %>"><%= item.WhsName %></td>
+                                    <!-- <td id="td-<%= item.id %>"><%= item.ListName %></td> -->
+                                    <td id="td-<%= item.id %>"><%= (parseFloat(item.AvgDaily)).toFixed(3) %></td>
+                                    <td id="onHand-<%= item.id %>"><%= item.OnHand %></td>
+                                    <td id="min-<%= item.id %>"><%= item.MinStock %></td>
+                                    <td id="max-<%= item.id %>"><%= item.MaxStock %></td>
+                                <% if(item.Order > 0) { %>
+                                    <td id="td-<%= item.id %>"><input id="input-<%= item.id %>" type="number" style="width: 100px;" step="0.0" value="<%= item.Order %>"/></td>
+                                <% } else { %>
+                                    <td id="td-<%= item.id %>"><input id="input-<%= item.id %>" type="number" style="width: 100px;" step="0.0"/></td>
+                                <% } %>
+                                <td id="receipt-<%= item.id %>"><%= item.receiptQnty %></td>
+                                <td id="receipt-<%= item.id %>"><%= item.totalSales %></td>
+                                <td id="uom-<%= item.id %>"><%= item.BuyUnitMsr %></td>
+                                <% if(item.Order > 0) {
+                                    if(parseFloat(item.Order) + parseFloat(item.OnHand) > parseFloat(item.MaxStock)){ %>
+                                    <td id="color-<%= item.id %>">red</td>
+                                    <%} else if(parseFloat(item.Order) + parseFloat(item.OnHand) < parseFloat(item.MinStock)){ %>
+                                    <td id="color-<%= item.id %>">blue</td>
+                                    <%} else { %>
+                                    <td id="color-<%= item.id %>">green</td>
+                                    <%}
+                                } else { 
+                                    if(parseFloat(item.OnHand) > parseFloat(item.MaxStock)){ %>
+                                    <td id="color-<%= item.id %>">red</td>
+                                    <%} else if(parseFloat(item.OnHand) < parseFloat(item.MinStock)){ %>
+                                    <td id="color-<%= item.id %>">blue</td>
+                                    <%} else { %>
+                                    <td id="color-<%= item.id %>">green</td>
+                                    <%}
+                                } %>
+                                <td style="display:none;" id="changed-<%= item.id %>">no</td>
+                                <td style="display:none;"><%= item.FatherCode+item.GenCode %></td>
+                                </tr>
+                            <% }; %>
+                        </tbody>
+                    <% } %>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+  </div>
