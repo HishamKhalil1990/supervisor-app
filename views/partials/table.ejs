@@ -22,6 +22,7 @@
                   <th>Total Sales</th>
                   <!-- <th>Price</th> -->
                   <th>Unit</th>
+                  <th>Note</th>
                   <th>Color</th>
                   <th style="display:none;">changed</th>
                 </tr>
@@ -76,7 +77,12 @@
                     <td id="receipt-<%= item.id %>"><%= item.receiptQnty %></td>
                     <td id="receipt-<%= item.id %>"><%= item.totalSales %></td>
                     <td id="uom-<%= item.id %>"><%= item.BuyUnitMsr %></td>
-                    <% if(item.Order > 0) {
+                    <% if(item.Remark != "") { %>
+                      <td id="noteFeild-<%= item.id %>" ><%= item.Remark %></td>
+                    <% } else { %>
+                      <td id="noteFeild-<%= item.id %>" >لا يوجد</td>
+                    <% }
+                    if(item.Order > 0) {
                       if(parseFloat(item.Order) + parseFloat(item.OnHand) > parseFloat(item.MaxStock)){ %>
                         <td id="color-<%= item.id %>">red</td>
                       <%} else if(parseFloat(item.Order) + parseFloat(item.OnHand) < parseFloat(item.MinStock)){ %>

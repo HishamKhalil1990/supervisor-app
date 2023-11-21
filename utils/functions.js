@@ -138,6 +138,7 @@ const saveTransferRequest = async(result,username) => {
             totalSales:rec.totalSales? rec.totalSales : 0,
             FatherCode:rec.fatherCode != null? rec.fatherCode : undefined,
             ChildName:rec.childName != null? rec.childName : undefined,
+            Remark:rec.remark != null? rec.remark : undefined,
         }
     })
     return prisma.createAllTransferReq(mappedData,username)
