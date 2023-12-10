@@ -8,6 +8,7 @@ const HANA_PASSWORD = process.env.HANA_PASSWORD;
 const HANA_DATABASE = process.env.HANA_DATABASE;
 const HANA_ITEMS_QNTY = process.env.HANA_ITEMS_QNTY;
 const HANA_TOTAL_SALES = process.env.HANA_TOTAL_SALES;
+const HANA_WAHREHOUSES = process.env.HANA_WAHREHOUSES;
 
 const hanaConfig = {
   serverNode: `${HANA_HOST}:30015`,
@@ -72,6 +73,11 @@ const getHanaItemInfo = async (whs,itemcode) => {
   }
 }
 
+const getwarehouseList = async () => {
+  const procedureStatment = `CALL "${HANA_DATABASE}"."${HANA_WAHREHOUSES}"`;
+  return execute(procedureStatment).catch(() => {return 'error'});
+};
+
 const execute = async (procdure) => { 
   return new Promise((resolve, reject) => {
     try {
@@ -99,5 +105,6 @@ const execute = async (procdure) => {
 };
 
 module.exports = {
-  getHanaItemInfo
+  getHanaItemInfo,
+  getwarehouseList
 };

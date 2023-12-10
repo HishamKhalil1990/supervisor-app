@@ -98,3 +98,21 @@
     align-items: center;
     justify-content: center;
 }
+
+.modal_waiting_container2 {
+    margin: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal_waiting_container3 {
+    margin: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}

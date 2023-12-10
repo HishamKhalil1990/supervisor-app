@@ -10,14 +10,13 @@ const goToPage = (page) => {
     });
   }
 
-//   const goDirect = (page,data) => {
-//     $('#body').html(data)
-//     document.getElementById(`${page}`).click();
-//   }
+  const goDirect = (page,data) => {
+    $('#body').html(data)
+    document.getElementById(`${page}`).click();
+  }
 
 $(document).ready(function() {
     $('#transfer').on('click',()=>{
-        console.log('transfer')
         page = 'goTransfer'
         showPage(page)
     })
@@ -36,6 +35,10 @@ $(document).ready(function() {
                 document.getElementById("goLogin").click();
             });
         });
+    });
+    $('#report').on('click',()=>{
+        const data = `<div><a style="color: white;" href="/Report" id="goReport">press</a></div>`
+        goDirect('goReport',data)
     });  
 })
 

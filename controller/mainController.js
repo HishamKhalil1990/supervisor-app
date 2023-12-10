@@ -1,4 +1,5 @@
 require('dotenv').config();
+const hana = require('../utils/hana')
 const functions = require('../utils/functions')
 const prisma = require('../utils/prismaDB')
 const sendEmail = require('../utils/email')
@@ -25,6 +26,20 @@ const validate = async (req,res) => {
         res.send({msg : 'validate'})
     }else if (user.length == 0){
         res.send({msg : 'not validate'})
+    }
+}
+
+const getWhs = async (req,res) => {
+    if(req.session.loggedin)
+    {
+        const whs = await hana.getwarehouseList()
+        if(whs != 'error'){
+            res.send(whs)
+        }else{
+            res.send('error')
+        }
+    }else{
+        res.redirect('/')
     }
 }
 
@@ -217,5 +232,6 @@ module.exports = {
     genCodes,
     getTransfer,
     submit,
-    saveOrderValue
+    saveOrderValue,
+    getWhs
 }

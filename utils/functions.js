@@ -7,6 +7,7 @@ const hana = require('./hana')
 // enviroment variables
 const USERS_TABLE = process.env.USERS_TABLE
 const REQUSET_TRANSFER_TABLE = process.env.REQUSET_TRANSFER_TABLE
+const SQL_INVENTORY_TRANSACTIONS_HISTORY_REPORT = process.env.SQL_INVENTORY_TRANSACTIONS_HISTORY_REPORT
 
 const getUser = async (username,password) => {
     try{
@@ -175,13 +176,13 @@ const sendBulkToSql = async(pool,records,reqStatus,supervisorName,date,role,type
         let saveStatus = reqStatus
         let statements = role == 'manager'? 
         {
-            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, receiptQnty = ${rec.receiptQnty}, totalSales = ${rec.totalSales}, QtyOrders = ${rec.Order}, managerName = '${supervisorName}', managerApproveTime = '${localDate}', managerQnty = ${rec.Order}  where ID = ${rec.id};`,
-            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, receiptQnty = ${rec.receiptQnty}, totalSales = ${rec.totalSales}, QtyOrders = 0, managerName = '${supervisorName}', managerApproveTime = '${localDate}', managerQnty = 0 where ID = ${rec.id};`
+            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, receiptQnty = ${rec.receiptQnty}, totalSales = ${rec.totalSales}, QtyOrders = ${rec.Order}, managerName = N'${supervisorName}', managerApproveTime = '${localDate}', managerQnty = ${rec.Order}  where ID = ${rec.id};`,
+            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, receiptQnty = ${rec.receiptQnty}, totalSales = ${rec.totalSales}, QtyOrders = 0, managerName = N'${supervisorName}', managerApproveTime = '${localDate}', managerQnty = 0 where ID = ${rec.id};`
         }
         :
         {
-            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, QtyOrders = ${rec.Order}, supervisorName = '${supervisorName}', approveTime = '${localDate}', supervisorQnty = ${rec.Order} where ID = ${rec.id};`,
-            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = 5, QtyOrders = 0, supervisorName = '${supervisorName}', approveTime = '${localDate}', supervisorQnty = 0 where ID = ${rec.id};`
+            approve:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = ${sapProcces}, QtyOrders = ${rec.Order}, supervisorName = N'${supervisorName}', approveTime = '${localDate}', supervisorQnty = ${rec.Order} where ID = ${rec.id};`,
+            decline:`update ${REQUSET_TRANSFER_TABLE} set SAP_Procces = 5, QtyOrders = 0, supervisorName = N'${supervisorName}', approveTime = '${localDate}', supervisorQnty = 0 where ID = ${rec.id};`
         }
         return statements[`${saveStatus}`]
     })
@@ -223,8 +224,66 @@ const changeTransferSapProcess = async(records,reqStatus,typeOfSubmit,supervisor
     })
 }
 
+const getInvTranHistReportData = async (whs) =>{ 
+    return new Promise((resolve,reject) => {
+        let response = {
+            msg:'error'
+        }
+        try{
+            const getSql = async() => {
+                const conn = await sql.getReportSQL()
+                if(conn){
+                    conn.connect()
+                        .then(function (pool) {
+                            const start = async() => {
+                                const transaction = await sql.getTransaction(pool);
+                                return transaction.begin((err) => {
+                                    if(err){
+                                        console.log(err)
+                                        conn.close()
+                                        return resolve(response)
+                                    }
+                                    pool.request()
+                                    .input("WhsCode",whs)
+                                    .execute(SQL_INVENTORY_TRANSACTIONS_HISTORY_REPORT,(err,result) => {
+                                        if(err){
+                                            console.log('excute',err)
+                                            conn.close()
+                                            return resolve(response)
+                                        }
+                                        transaction.commit((err) => {
+                                            conn.close()
+                                            if(err){
+                                                console.log('transaction error : ',err)
+                                                return resolve(response)
+                                            }else{
+                                                console.log("Transaction committed.");
+                                                response.msg = 'done'
+                                                response.data = result != undefined? result.recordset : result
+                                                return resolve(response)
+                                            }
+                                        });
+                                    })
+                                })
+                            }
+                            start()
+                    })
+                }else{
+                    resolve(response)
+                }
+            }
+            getSql()
+        }catch(err){
+            console.log(err)
+            resolve(response)
+        }
+    })
+
+}
+
 module.exports = {
     getUser,
     getTransferAvailable,
     changeTransferSapProcess,
+    getInvTranHistReportData
 }

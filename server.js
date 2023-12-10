@@ -30,6 +30,8 @@ app.listen(PORT,err => { // to use a port for the server app
 
 // import routes
 const mainRouter = require('./routes/mainRoute');
+const reportRouter = require('./routes/reportRoute')
 
 // use middleware routes
 app.use('/',mainRouter);
+app.use('/Report',reportRouter);

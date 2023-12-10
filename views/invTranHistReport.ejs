@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" style="height:100%;">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/request.css"/>
+    <link rel="stylesheet" href="/table/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/table/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/table/dataTables.bootstrap4.min.css"/>
+    <link rel="stylesheet" href="/css/modal.css"/>
+    <link rel="stylesheet" href="/css/routing.css"/>
+    <link rel="stylesheet" href="/css/sync.css"/>
+    <link rel="stylesheet" href="/css/netError.css"/>
+    <link rel="stylesheet" href="/css/success.css"/>
+    <link rel="stylesheet" href="/css/spinner.css"/>
+    <script src="/table/jquery-3.3.1.slim.min.js"></script>
+    <script src="/js/jquery.min.js"></script>
+    <script src="/table/bootstrap.bundle.min.js"></script>
+    <script src="/table/jquery.dataTables.min.js"></script>
+    <script src="/table/dataTables.bootstrap4.min.js"></script>
+    <script src="/js/invTranHistReport.js"></script>
+    <title>Inventory Transactions History Report</title>
+</head>
+<body id="body" style="position: relative;height:100%;">
+    <div>
+        <%- include("partials/navigationBtu",{pageName:"تقرير حركات المستودع"}) %>
+    </div>
+    <div id="reportTable"></div>
+    <!-- <div class="otterDiv">
+        <div class="btuLoctaion">
+            <button id="excel" class="btu" style="padding-left: 10px;padding-right: 10px;"><p class="para">Excel</p></button>
+        </div>
+    </div> -->
+    <div>
+        <%- include("partials/modal") %>
+    </div>
+    <div>
+        <a style="color: white;" href="#" id="exportExcel">press</a>
+    </div>
+</body>
+</html>
