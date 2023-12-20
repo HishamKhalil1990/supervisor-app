@@ -156,6 +156,26 @@ function convertUTCDateToLocalDate(d) {
     return newDate;   
 }
 
+const sendUpdatedRequestBatch = async(pool,batchArr,index) => {
+    return new Promise((resolve,reject) => {
+        const mappedData = batchArr.join('')
+        const time = index*1000
+        setTimeout(() => {
+            try{
+                pool.batch(mappedData, (err, result) => {
+                    if (err){ 
+                        resolve('error')
+                    }else{
+                        resolve('done')
+                    }
+                })
+            }catch(err){
+                resolve('error')
+            }
+        },time)
+    })
+}
+
 const sendBulkToSql = async(pool,records,reqStatus,supervisorName,date,role,typeOfSubmit) => {
     const ids = []
     let localDate = convertUTCDateToLocalDate(date)
@@ -186,17 +206,36 @@ const sendBulkToSql = async(pool,records,reqStatus,supervisorName,date,role,type
         }
         return statements[`${saveStatus}`]
     })
-    mappedeRecords = mappedeRecords.join('')
+    const promises = []
+    let batchArr = []
+    let index = 0
+    mappedeRecords.forEach(rec => {
+        if(batchArr.length == 100){
+            promises.push(sendUpdatedRequestBatch(pool,batchArr,index))
+            batchArr = []
+            index += 1
+        }
+        batchArr.push(rec)
+    })
+    if(batchArr.length > 0){
+        promises.push(sendUpdatedRequestBatch(pool,batchArr,index))
+    }
+    const promisesResults = await Promise.all(promises)
     return new Promise((resolve,reject) => {
         try{
-            pool.batch(mappedeRecords, (err, result) => {
-                if (err){ 
-                    reject()
-                }else{
-                    prisma.deleteReqStatus(ids)
-                    resolve()
+            let status = 'done'
+            for(let i = 0; i < promisesResults.length; i++){
+                if(promisesResults[i] == 'error'){
+                    status = 'error'
+                    break
                 }
-            })
+            }
+            if(status != 'error'){
+                prisma.deleteReqStatus(ids)
+                resolve()
+            }else{
+                reject()
+            }
         }catch(err){
             reject()
         }
