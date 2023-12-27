@@ -23,6 +23,7 @@
                         <th style="display:none;">Min</th>
                         <th style="display:none;" id="max-th">Max</th>
                         <th>Order</th>
+                        <th>Ordered by Branch</th>
                         <th style="display:none;">Receipt Qnty</th>
                         <th style="display:none;">Total Sales</th>
                         <!-- <th>Price</th> -->
@@ -71,8 +72,10 @@
                                     <td style="display:none;" id="max-<%= item.id %>"><%= item.MaxStock %></td>
                                 <% if(item.Order > 0) { %>
                                     <td id="td-<%= item.id %>"><input id="input-<%= item.id %>" type="number" style="width: 100px;" step="0.0" value="<%= item.Order %>"/></td>
+                                    <td id="td-<%= item.id %>">Y</td>
                                 <% } else { %>
                                     <td id="td-<%= item.id %>"><input id="input-<%= item.id %>" type="number" style="width: 100px;" step="0.0"/></td>
+                                    <td id="td-<%= item.id %>">N</td>
                                 <% } %>
                                 <td style="display:none;" id="receipt-<%= item.id %>"><%= item.receiptQnty %></td>
                                 <td style="display:none;" id="receipt-<%= item.id %>"><%= item.totalSales %></td>

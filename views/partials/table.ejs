@@ -17,6 +17,7 @@
                   <th>Min</th>
                   <th id="max-th">Max</th>
                   <th>Order</th>
+                  <th>Ordered by Branch</th>
                   <th>Add</th>
                   <th>Receipt Qnty</th>
                   <th>Total Sales</th>
@@ -65,8 +66,10 @@
                     <% if(!info.fathers.includes(item.FatherCode)){
                       if(item.Order > 0) { %>
                         <td id="td-<%= item.id %>"><input id="input-<%= item.id %>" type="number" style="width: 100px;" step="0.0" value="<%= item.Order %>"/></td>
+                        <td id="td-<%= item.id %>">Y</td>
                       <% } else { %>
                         <td id="td-<%= item.id %>"><input id="input-<%= item.id %>" type="number" style="width: 100px;" step="0.0"/></td>
+                        <td id="td-<%= item.id %>">N</td>
                       <% } %>
                       <td id="td-<%= item.id %>"></td>
                     <% }else{ %>
